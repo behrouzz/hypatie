@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="gravitational",
+    name="hypatie",
     version="0.0.1",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
