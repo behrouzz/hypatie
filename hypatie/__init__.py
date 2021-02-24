@@ -1,4 +1,2 @@
-# Behrouz Safari
-
-# Version of the hypatie package
-__version__ = "0.0.0"
+from .core import *
+__version__ = "0.0.1"
