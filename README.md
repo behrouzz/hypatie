@@ -25,7 +25,7 @@ t1 = '2021-03-20 08:00:00'
 t2 = '2021-03-20 10:00:00'
 ```
 
-If you want the apparent RA and DEC of the Sun in with respect to Earth (geocentric):
+If you want the apparent RA and DEC of the Sun with respect to Earth (geocentric):
 
 ```python
 dates, positions = hp.get_position('obs', 'sun', t1, t2, step=100)
