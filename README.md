@@ -19,7 +19,7 @@ The only requirement is *numpy*.
 Let's get the positions of the sun between two times:
 
 ```python
-import hypatie
+import hypatie as hp
 
 t1 = '2021-03-20 08:00:00'
 t2 = '2021-03-20 10:00:00'
@@ -28,11 +28,11 @@ t2 = '2021-03-20 10:00:00'
 If you want the apparent RA and DEC of the Sun in with respect to Earth (geocentric):
 
 ```python
-dates, positions = hy.get_position('obs', 'sun', t1, t2, step=100)
+dates, positions = hp.get_position('obs', 'sun', t1, t2, step=100)
 ```
 
 If you want the cartesian positions (x,y,z) of the Sun with respect to the barycenter of Solar System:
 
 ```python
-dates, positions = hy.get_position('vec', 'sun', t1, t2, step=100)
+dates, positions = hp.get_position('vec', 'sun', t1, t2, step=100)
 ```
