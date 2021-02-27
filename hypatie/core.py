@@ -8,17 +8,16 @@ BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
 #https://ssd.jpl.nasa.gov/horizons.cgi?show=1#results
 #center : geocentric='500@399', ssb='500@0'
 
-def _time_format(t1, t2):
+def _time_format(t):
     correct = True
-    if isinstance(t1, datetime):
-        t1 = t1.isoformat()
-        t2 = t2.isoformat()
-    elif isinstance(t1, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t1)):
-        t1 = t1.replace(' ', 'T')
-        t2 = t2.replace(' ', 'T')
+    if isinstance(t, datetime):
+        t = t.isoformat()
+    elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
+        t = t.replace(' ', 'T')
     else:
         correct = False
-    return [correct, t1, t2]
+    return [correct, t]
+    
 
 class Vector:
     """
@@ -33,7 +32,7 @@ class Vector:
     t2 : datetime or str in format '%Y-%m-%d %H:%M:%S'
         time to which to request data
     steps: int
-        number of time intervals (default 20)
+        number of time intervals
     center: str
         origin of coordinates. format: site@body (default '500@0')
     reg_plane: str
@@ -57,25 +56,42 @@ class Vector:
         url of NASA's JPL Horizons that procuded the results 
     """
 
-    def __init__(self, target, t1, t2, step=20, center='500@0', ref_plane='FRAME', vec_table=1):
+    def __init__(self, target, t1, t2=None, step=None, center='500@0', ref_plane='FRAME', vec_table=1):
         self.target = target
-        self.step = step
         self.center = center
         self.ref_plane = ref_plane
         self.vec_table = vec_table
-        correct, t1, t2 = _time_format(t1, t2)
+        
+        correct, t1 = _time_format(t1)
         if correct:
             self.t1 = t1
+        else:
+            raise Exception("t1 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
+        self.init = False
+        if t2 is None:
+            self.init = True # user just wants the initial state
+            step = 1
+            t2 = datetime.strptime(self.t1, '%Y-%m-%dT%H:%M:%S') + timedelta(seconds=1)
+        
+        correct, t2 = _time_format(t2)
+        if correct:
             self.t2 = t2
         else:
-            raise Exception("t1 & t2 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
+            raise Exception("t2 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
+            
+        self.step = step
+
         error_msg, time, pos = self.get_request()
+        
         if len(error_msg)==0:
-            self.time = time
-            self.pos = pos
-            self.x = pos[:,0]
-            self.y = pos[:,1]
-            self.z = pos[:,2]
+            if self.init:
+                self.time = time[0]
+                self.pos = pos[0]
+                self.x, self.y, self.z = pos[0][0], pos[0][1], pos[0][2]
+            else:
+                self.time = time
+                self.pos = pos
+                self.x, self.y, self.z = pos[:,0], pos[:,1], pos[:,2]
         else:
             raise Exception('\n'+error_msg[:-2])
 
@@ -141,7 +157,7 @@ class Observer:
     t2 : datetime or str in format '%Y-%m-%d %H:%M:%S'
         time to which to request data
     steps: int
-        number of time intervals (default 20)
+        number of time intervals
     center: str
         origin of coordinates. format: site@body (default '500@399')
     quantities: int:
@@ -160,23 +176,41 @@ class Observer:
     url : str
         url of NASA's JPL Horizons that procuded the results 
     """
-    def __init__(self, target, t1, t2, step=20, center='500@399', quantities=2):
+    def __init__(self, target, t1, t2=None, step=None, center='500@399', quantities=2):
         self.target = target
-        self.step = step
         self.center = center
         self.quantities = quantities
-        correct, t1, t2 = _time_format(t1, t2)
+        
+        correct, t1 = _time_format(t1)
         if correct:
             self.t1 = t1
+        else:
+            raise Exception("t1 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
+        self.init = False
+        if t2 is None:
+            self.init = True # user just wants the initial state
+            step = 1
+            t2 = datetime.strptime(self.t1, '%Y-%m-%dT%H:%M:%S') + timedelta(seconds=1)
+        
+        correct, t2 = _time_format(t2)
+        if correct:
             self.t2 = t2
         else:
-            raise Exception("t1 & t2 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
+            raise Exception("t2 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
+            
+        self.step = step
+
         error_msg, time, pos = self.get_request()
+        
         if len(error_msg)==0:
-            self.time = time
-            self.pos = pos
-            self.ra = pos[:,0]
-            self.dec = pos[:,1]
+            if self.init:
+                self.time = time[0]
+                self.pos = pos[0]
+                self.ra, self.dec = pos[0][0], pos[0][1]
+            else:
+                self.time = time
+                self.pos = pos
+                self.ra, self.dec = pos[:,0], pos[:,1]
         else:
             raise Exception('\n'+error_msg[:-2])
 
