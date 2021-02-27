@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="hypatie",
-    version="0.0.1",
+    version="0.0.2",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
-    description="A python package for querying NASA's Horizons API",
+    description="A python package for querying NASA's JPL HORIZONS API",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/behrouzz/hypatie",
@@ -21,5 +21,5 @@ setuptools.setup(
     packages=["hypatie"],
     include_package_data=True,
     install_requires=["numpy"],
-    python_requires='>=3.6',
+    python_requires='>=3.4',
 )
