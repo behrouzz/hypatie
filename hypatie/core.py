@@ -69,15 +69,15 @@ class Vector:
             self.t2 = t2
         else:
             raise Exception("t1 & t2 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
-        found, time, pos = self.get_request()
-        if found:
+        error_msg, time, pos = self.get_request()
+        if len(error_msg)==0:
             self.time = time
             self.pos = pos
             self.x = pos[:,0]
             self.y = pos[:,1]
             self.z = pos[:,2]
         else:
-            raise Exception("target not valid!")
+            raise Exception('\n'+error_msg[:-2])
 
     def vector_url(self, target, t1, t2, step, center, ref_plane, vec_table):
         """Returns cartesian vector of a target body"""
@@ -105,12 +105,14 @@ class Vector:
         return url
 
     def get_request(self):
+        error_msg = ''
         url = self.vector_url(self.target, self.t1, self.t2, self.step,
                               self.center, self.ref_plane, self.vec_table)
         with urlopen(url) as r:
             text = r.read().decode('utf-8')
-        if ('Multiple major-bodies match' in text) or ('No matches found' in text):
-            return [False, np.array([]), np.array([])]
+        if ('$$SOE' not in text) or ('$$EOE' not in text):
+            error_msg = text[:text.find('$$SOF')]
+            return [error_msg, np.array([]), np.array([])]
         mark1 = text.find('$$SOE')
         text = text[mark1+6:]
         mark2 = text.find('$$EOE')
@@ -123,7 +125,7 @@ class Vector:
         for p in pS:
             tmp_ls = [float(i.strip())*1000 for i in p]
             pos_list.append(tmp_ls)
-        return [True, np.array(times), np.array(pos_list)]
+        return [error_msg, np.array(times), np.array(pos_list)]
 
 
 class Observer:
@@ -169,14 +171,14 @@ class Observer:
             self.t2 = t2
         else:
             raise Exception("t1 & t2 must be datetime or str: '%Y-%m-%d %H:%M:%S'")
-        found, time, pos = self.get_request()
-        if found:
+        error_msg, time, pos = self.get_request()
+        if len(error_msg)==0:
             self.time = time
             self.pos = pos
             self.ra = pos[:,0]
             self.dec = pos[:,1]
         else:
-            raise Exception("target not valid!")
+            raise Exception('\n'+error_msg[:-2])
 
     def observer_url(self, target, t1, t2, step, center, quantities):
         """Returns RA, DEC of target body"""
@@ -207,12 +209,14 @@ class Observer:
         return url
 
     def get_request(self):
+        error_msg = ''
         url = self.observer_url(self.target, self.t1, self.t2, self.step,
                                 self.center, self.quantities)
         with urlopen(url) as r:
             text = r.read().decode('utf-8')
-        if ('Multiple major-bodies match' in text) or ('No matches found' in text):
-            return [False, np.array([]), np.array([])]
+        if ('$$SOE' not in text) or ('$$EOE' not in text):
+            error_msg = text[:text.find('$$SOF')]
+            return [error_msg, np.array([]), np.array([])]
         mark1 = text.find('$$SOE')
         text = text[mark1+6:]
         mark2 = text.find('$$EOE')
@@ -225,12 +229,4 @@ class Observer:
         for p in pS:
             tmp_ls = [float(i.strip()) for i in p]
             pos_list.append(tmp_ls)
-        return [True, np.array(times), np.array(pos_list)]
-
-
-
-
-t1 = '2021-03-20 08:00:00'
-t2 = '2021-03-20 10:00:00'
-
-
+        return [error_msg, np.array(times), np.array(pos_list)]

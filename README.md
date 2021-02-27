@@ -66,4 +66,4 @@ vec = hp.Vector('sun', t1, t2, step=5)
 ```
 
 As with the *Observer* class, there are two attributes *.time* and *.pos* for *Vector* class.
-Note the when creating a Vector class, you have *.x*, *.y* and *.z* attributes instead of *ra* and *des*.
+Note the when creating a Vector class, you have *.x*, *.y* and *.z* attributes instead of *.ra* and *.des*.
