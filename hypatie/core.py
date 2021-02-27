@@ -47,11 +47,19 @@ class Vector:
     pos : numpy array with shape (n, 3); n: number of steps
         coordinates array with three columns (x, y, z)
     x : numpy array with shape (n,); n: number of steps
-        x of cartesian coordinates 
+        x component of position vector(s)
     y : numpy array with shape (n,); n: number of steps
-        y of cartesian coordinates
+        y component of position vector(s)
     z : numpy array with shape (n,); n: number of steps
-        z of cartesian coordinates
+        z component of position vector(s)
+    vel : numpy array with shape (n, 3); n: number of steps
+        velocity array with three columns (vx, vy, vz)
+    vx : numpy array with shape (n,); n: number of steps
+        x component of velocity vector(s)
+    vy : numpy array with shape (n,); n: number of steps
+        y component of velocity vector(s)
+    vz : numpy array with shape (n,); n: number of steps
+        z component of velocity vector(s)
     url : str
         url of NASA's JPL Horizons that procuded the results 
     """
@@ -81,17 +89,28 @@ class Vector:
             
         self.step = step
 
-        error_msg, time, pos = self.get_request()
+        error_msg, time, pos, vel = self.get_request()
         
         if len(error_msg)==0:
             if self.init:
                 self.time = time[0]
                 self.pos = pos[0]
                 self.x, self.y, self.z = pos[0][0], pos[0][1], pos[0][2]
+                if vel.shape!=(0,):
+                    self.vel = vel[0]
+                    self.vx, self.vy, self.vz = vel[0,0], vel[0,1], vel[0,2]
+                else:
+                    self.vel = vel
+                
             else:
                 self.time = time
                 self.pos = pos
                 self.x, self.y, self.z = pos[:,0], pos[:,1], pos[:,2]
+                self.vel = vel
+                if vel.shape!=(0,):
+                    self.vx, self.vy, self.vz = vel[:,0], vel[:,1], vel[:,2]
+                else:
+                    self.vx, self.vy, self.vz = vel, vel, vel
         else:
             raise Exception('\n'+error_msg[:-2])
 
@@ -134,14 +153,28 @@ class Vector:
         mark2 = text.find('$$EOE')
         text = text[:mark2]
         rows = text.split('\n')[:-1]
+        n_columns = len(rows[0].split(',')[:-1])
+        
         times = [i.split(',')[1].strip()[5:] for i in rows]
         times = [datetime.strptime(i, '%Y-%b-%d %H:%M:%S.%f') for i in times]
+
+        # positions
         pS = [i.split(',')[2:5] for i in rows]
         pos_list = []
         for p in pS:
             tmp_ls = [float(i.strip())*1000 for i in p]
             pos_list.append(tmp_ls)
-        return [error_msg, np.array(times), np.array(pos_list)]
+
+        # velocities
+        if n_columns==8:
+            vS = [i.split(',')[5:8] for i in rows]
+            vel_list = []
+            for v in vS:
+                tmp_ls = [float(i.strip())*1000 for i in v]
+                vel_list.append(tmp_ls)
+        else:
+            vel_list = []
+        return [error_msg, np.array(times), np.array(pos_list), np.array(vel_list)]
 
 
 class Observer:
@@ -264,3 +297,7 @@ class Observer:
             tmp_ls = [float(i.strip()) for i in p]
             pos_list.append(tmp_ls)
         return [error_msg, np.array(times), np.array(pos_list)]
+
+t1 = '2021-03-20 08:00:00'
+t2 = '2021-03-20 10:00:00'
+vec = Vector('sun', t1, vec_table=2)
