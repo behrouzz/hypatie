@@ -252,7 +252,6 @@ class Observer:
 
         if len(center.split('@'))==2:
             body = center.split('@')[-1]
-            
         elif len(center.split('@'))==1:
             body = '399'
         else:
@@ -260,7 +259,7 @@ class Observer:
 
         crd = center.split('@')[0]
         if len(crd.split(','))==3:
-            crd = ''.join(crd.split(',')[:-1]) + ',' + str(int(crd.split(',')[-1])/1000)
+            crd = ','.join(crd.split(',')[:-1]) + ',' + str(int(crd.split(',')[-1])/1000)
         elif len(crd.split(','))==2:
             crd = crd + ',0'
         else:

@@ -59,14 +59,14 @@ print(obs.pos)
 
 The first column in the above array is RA and the second column is DEC.
 
-It is possible to the apparent RA & DEC of a targer with respect to a specified coordinates on the surface of a body.
+It is possible to get the apparent RA & DEC of a targer with respect to a specified location on the surface of a body.
 For example, if you want to get the apparent RA & DEC of the Sun for the Eiffel Tower :
 
 ```python
 obs = hp.Observer('sun', t1, t2, step=5, center='2.2945,48.8584,300@399')
 ```
 
-Note that 2.2945 is the lingtitude, 48.8584 is the latitude and 300 (meters) is the elevation of the Eiffel Tower.
+Note that 2.2945 is the longtitude, 48.8584 is the latitude and 300 (meters) is the elevation of the Eiffel Tower.
 We have specified '@399' at the end which means that this coordinates is situated on the Earth (399 is the Earth's code).                                                                                           
 
 You can request the cartesian positions (x,y,z) of a target with *Vector* class.
@@ -76,4 +76,4 @@ vec = hp.Vector('sun', t1, t2, step=5)
 ```
 
 As with the *Observer* class, there are two attributes *.time* and *.pos* for *Vector* class.
-Note the when creating a Vector class, you have *.x*, *.y* and *.z* attributes instead of *.ra* and *.des*.
+Note that when creating a Vector class, you have *.x*, *.y* and *.z* attributes instead of *.ra* and *.des*.
