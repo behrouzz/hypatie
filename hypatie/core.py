@@ -10,7 +10,7 @@ BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
 def _time_format(t):
     correct = True
     if isinstance(t, datetime):
-        t = t.isoformat()
+        t = t.isoformat()[:19]
     elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
         t = t.replace(' ', 'T')
     else:
