@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="hypatie",
-    version="1.0.0",
+    version="1.0.1",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
     description="A python package for querying NASA's JPL HORIZONS API",
@@ -20,6 +20,6 @@ setuptools.setup(
     ],
     packages=["hypatie"],
     include_package_data=True,
-    install_requires=["numpy"],
+    install_requires=["numpy", "matplotlib"],
     python_requires='>=3.4',
 )

@@ -83,23 +83,23 @@ For both *Vector* and *Observer* classes you can pass a single time to get posit
 vec = hp.Vector('sun', t1)
 ```
 
-## Example: animating Apollo 11 mission
+## Example: animating James Webb Space Telescope
 
 ```python
 import hypatie as hp
 
-t1 = '1969-07-17 16:40:00'
-t2 = '1969-07-28 00:06:00'
+t1 = '2018-10-01 14:18:00'
+t2 = '2024-12-31 12:18:00'
 
 # get positions with respect to the barycenter of earth-moon
 earth = hp.Vector('399', t1, t2, center='500@3', step=1000)
 moon = hp.Vector('301', t1, t2, center='500@3', step=1000)
-apollo = hp.Vector('-399110', t1, t2, center='500@3', step=1000)
+jwst = hp.Vector('-170', t1, t2, center='500@3', step=1000)
 
-bodies = [earth, moon, apollo]
-names = ['Earth', 'Moon', 'Apollo 11']
+bodies = [earth, moon, jwst]
+names = ['Earth', 'Moon', 'James Webb']
 colors = ['b','g','r']
-sizes = [30, 10, 3]
+sizes = [20, 8, 3]
 
 # play the animation
 hp.play(bodies, names, colors, sizes)
