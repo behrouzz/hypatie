@@ -23,6 +23,10 @@ def play(bodies, names, colors, sizes, path=True, legend=True, interval=20):
         legend of the plot; default True.
     interval : int
         time interval between sequences, greater means slower. default 20.
+
+    Returns
+    -------
+    matplotlib.animation.FuncAnimation object
     """
     
     for b in bodies:
@@ -83,7 +87,8 @@ def play(bodies, names, colors, sizes, path=True, legend=True, interval=20):
         plt.legend(loc='upper left')
     plt.grid(True)
 
-    _ = FuncAnimation(fig, animate, init_func=init,
-                      frames=len(dates),
-                      interval=interval, blit=True, repeat=True)
+    anim = FuncAnimation(fig, animate, init_func=init,
+                         frames=len(dates), interval=interval,
+                         blit=True, repeat=True)
     plt.show()
+    return anim
