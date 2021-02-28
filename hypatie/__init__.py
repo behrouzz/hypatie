@@ -1,2 +1,3 @@
 from .core import *
-__version__ = "0.0.8"
+from .animation import *
+__version__ = "1.0.0"

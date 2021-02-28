@@ -77,3 +77,30 @@ vec = hp.Vector('sun', t1, t2, step=5)
 
 As with the *Observer* class, there are two attributes *.time* and *.pos* for *Vector* class.
 Note that when creating a Vector class, you have *.x*, *.y* and *.z* attributes instead of *.ra* and *.des*.
+
+For both *Vector* and *Observer* classes you can pass a single time to get position/state of a body at a single time:
+```python
+vec = hp.Vector('sun', t1)
+```
+
+## Example: animating Apollo 11 mission
+
+```python
+import hypatie as hp
+
+t1 = '1969-07-17 16:40:00'
+t2 = '1969-07-28 00:06:00'
+
+# get positions with respect to the barycenter of earth-moon
+earth = hp.Vector('399', t1, t2, center='500@3', step=1000)
+moon = hp.Vector('301', t1, t2, center='500@3', step=1000)
+apollo = hp.Vector('-399110', t1, t2, center='500@3', step=1000)
+
+bodies = [earth, moon, apollo]
+names = ['Earth', 'Moon', 'Apollo 11']
+colors = ['b','g','r']
+sizes = [30, 10, 3]
+
+# play the animation
+hp.play(bodies, names, colors, sizes)
+```
