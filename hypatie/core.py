@@ -6,7 +6,6 @@ import numpy as np
 BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
 
 #https://ssd.jpl.nasa.gov/horizons.cgi?show=1#results
-#center : geocentric='500@399', ssb='500@0'
 
 def _time_format(t):
     correct = True
@@ -42,8 +41,8 @@ class Vector:
     
     Attributes
     ----------
-    time : datetime
-        time at which the coordinates is presented
+    time : list of datetime objects
+        each element of list is the time at which the coordinates is presented
     pos : numpy array with shape (n, 3); n: number of steps
         coordinates array with three columns (x, y, z)
     x : numpy array with shape (n,); n: number of steps
@@ -174,7 +173,7 @@ class Vector:
                 vel_list.append(tmp_ls)
         else:
             vel_list = []
-        return [error_msg, np.array(times), np.array(pos_list), np.array(vel_list)]
+        return [error_msg, times, np.array(pos_list), np.array(vel_list)]
 
 
 class Observer:
@@ -192,14 +191,14 @@ class Observer:
     steps: int
         number of time intervals
     center: str
-        origin of coordinates. format: site@body (default '500@399')
+        Observer location. format: site@body (default '500@399')
     quantities: int:
         enter 1 for astrometric RA & DEC and 2 for apparent RA & DEC (default 2)
     
     Attributes
     ----------
-    time : datetime
-        time at which the coordinates is presented
+    time : list of datetime objects
+        each element of list is the time at which the coordinates is presented
     pos : numpy array with shape (n, 2); n: number of steps
         coordinates array with two columns (RA & DEC)
     ra : numpy array with shape (n,); n: number of steps
@@ -247,8 +246,42 @@ class Observer:
         else:
             raise Exception('\n'+error_msg[:-2])
 
-    def observer_url(self, target, t1, t2, step, center, quantities):
+    def coord(self, center):        
+        valid_center = True
+        str_center = ''
+
+        if len(center.split('@'))==2:
+            body = center.split('@')[-1]
+            
+        elif len(center.split('@'))==1:
+            body = '399'
+        else:
+            valid_center = False
+
+        crd = center.split('@')[0]
+        if len(crd.split(','))==3:
+            crd = ''.join(crd.split(',')[:-1]) + ',' + str(int(crd.split(',')[-1])/1000)
+        elif len(crd.split(','))==2:
+            crd = crd + ',0'
+        else:
+            valid_center = False
+
+        if valid_center:
+            str_center = f"coord@{body}'&COORD_TYPE='GEODETIC'&SITE_COORD='{crd}"
+
+        return [valid_center, str_center]
+    
+    def observer_url(self, target, t1, t2, step, center, quantities, skip_daylight=True):
         """Returns RA, DEC of target body"""
+        if len(center.split(',')) > 1: #coordinates
+            valid_center, center = self.coord(center)
+            skip_daylight = False
+            quantities = 4 # apparent Ra & DEC
+            if not valid_center:
+                raise Exception('Center is not valid!')
+
+        skip_daylight='YES' if skip_daylight==True else 'NO'
+        
         params = f"""COMMAND='{target}'
         CENTER='{center}'
         MAKE_EPHEM='YES'
@@ -263,16 +296,18 @@ class Observer:
         RANGE_UNITS='KM'
         APPARENT='AIRLESS'
         SUPPRESS_RANGE_RATE='YES'
-        SKIP_DAYLT='YES'
+        SKIP_DAYLT='{skip_daylight}'
         EXTRA_PREC='YES'
         R_T_S_ONLY='NO'
         REF_SYSTEM='J2000'
         CSV_FORMAT='YES'
         OBJ_DATA='NO'
         QUANTITIES='{quantities}'"""
+        
         params = params.replace('\n', '&').replace(' ', '')
         url = BASE_URL + params
         self.url = url
+        
         return url
 
     def get_request(self):
@@ -296,8 +331,4 @@ class Observer:
         for p in pS:
             tmp_ls = [float(i.strip()) for i in p]
             pos_list.append(tmp_ls)
-        return [error_msg, np.array(times), np.array(pos_list)]
-
-t1 = '2021-03-20 08:00:00'
-t2 = '2021-03-20 10:00:00'
-vec = Vector('sun', t1, vec_table=2)
+        return [error_msg, times, np.array(pos_list)]

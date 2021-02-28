@@ -14,7 +14,7 @@ You can install the latest version of *hypatie* from [PyPI](https://pypi.org/pro
 The only requirement is *numpy*.
 
 
-## How to use
+## Quick start
 
 Let's get the positions of the sun between two times:
 
@@ -25,7 +25,7 @@ t1 = '2021-03-20 08:00:00'
 t2 = '2021-03-20 10:00:00'
 ```
 
-If you want the apparent RA and DEC of the Sun with respect to Earth (geocentric):
+If you want the apparent RA and DEC of the Sun with respect to Earth's center (geocentric):
 
 ```python
 obs = hp.Observer('sun', t1, t2, step=5)
@@ -58,6 +58,16 @@ print(obs.pos)
 ```
 
 The first column in the above array is RA and the second column is DEC.
+
+It is possible to the apparent RA & DEC of a targer with respect to a specified coordinates on the surface of a body.
+For example, if you want to get the apparent RA & DEC of the Sun for the Eiffel Tower :
+
+```python
+obs = hp.Observer('sun', t1, t2, step=5, center='2.2945,48.8584,300@399')
+```
+
+Note that 2.2945 is the lingtitude, 48.8584 is the latitude and 300 (meters) is the elevation of the Eiffel Tower.
+We have specified '@399' at the end which means that this coordinates is situated on the Earth (399 is the Earth's code).                                                                                           
 
 You can request the cartesian positions (x,y,z) of a target with *Vector* class.
 
