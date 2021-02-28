@@ -90,5 +90,4 @@ def play(bodies, names, colors, sizes, path=True, legend=True, interval=20):
     anim = FuncAnimation(fig, animate, init_func=init,
                          frames=len(dates), interval=interval,
                          blit=True, repeat=True)
-    plt.show()
     return anim

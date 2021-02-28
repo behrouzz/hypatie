@@ -87,6 +87,7 @@ vec = hp.Vector('sun', t1)
 
 ```python
 import hypatie as hp
+import matplotlib.pyplot as plt
 
 t1 = '2018-10-01 14:18:00'
 t2 = '2024-12-31 12:18:00'
@@ -102,5 +103,6 @@ colors = ['b','g','r']
 sizes = [20, 8, 3]
 
 # play the animation
-hp.play(bodies, names, colors, sizes)
+anim = hp.play(bodies, names, colors, sizes)
+plt.show()
 ```
