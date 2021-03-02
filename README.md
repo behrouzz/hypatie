@@ -11,7 +11,7 @@ You can install the latest version of *hypatie* from [PyPI](https://pypi.org/pro
 
     pip install hypatie
 
-The only requirement is *numpy*.
+The only requirements are *numpy* and *matplotlib*.
 
 
 ## Quick start
@@ -76,14 +76,24 @@ vec = hp.Vector('sun', t1, t2, step=5)
 ```
 
 As with the *Observer* class, there are two attributes *.time* and *.pos* for *Vector* class.
-Note that when creating a Vector class, you have *.x*, *.y* and *.z* attributes instead of *.ra* and *.des*.
+Note that when creating a Vector class, you have *.x*, *.y* and *.z* attributes instead of *.ra* and *.dec*.
 
 For both *Vector* and *Observer* classes you can pass a single time to get position/state of a body at a single time:
 ```python
 vec = hp.Vector('sun', t1)
 ```
 
+Both *Vector* and *Observer* classes have *.plot()* method.
+```python
+# plot polar coordinates
+obs.plot()
+# plot cartesian coordinates
+vec.plot()
+```
+
 ## Example: animating James Webb Space Telescope
+
+In addition to *.plot()* method of *Vector* and *Observer* classes, there's a *play()* function that you can pass it a list of Vector objects as well as some other lists as shown in the example below:
 
 ```python
 import hypatie as hp

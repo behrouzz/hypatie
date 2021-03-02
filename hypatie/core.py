@@ -2,10 +2,9 @@ import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
 import numpy as np
+from .plots import plot_radec, plot_xyz
 
 BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
-
-#https://ssd.jpl.nasa.gov/horizons.cgi?show=1#results
 
 def _time_format(t):
     correct = True
@@ -60,7 +59,11 @@ class Vector:
     vz : numpy array with shape (n,); n: number of steps
         z component of velocity vector(s)
     url : str
-        url of NASA's JPL Horizons that procuded the results 
+        url of NASA's JPL Horizons that procuded the results
+    
+    Methods
+    -------
+    plot : plots the cartesian coordinates (x,y,z) of the target body.
     """
 
     def __init__(self, target, t1, t2=None, step=None, center='500@0', ref_plane='FRAME', vec_table=1):
@@ -175,6 +178,26 @@ class Vector:
             vel_list = []
         return [error_msg, times, np.array(pos_list), np.array(vel_list)]
 
+    def plot(self, color='b', size=10):
+        """
+        plots the cartesian coordinates (x,y,z) of the target body.
+        
+        Arguments
+        ----------
+        color : str
+            color of body
+        size : int
+            size of body
+        
+        Returns
+        -------
+        matplotlib.axes.Axes object
+        """
+        if isinstance(self.time, list):
+            return plot_xyz(self.x, self.y, self.z, color, size)
+        else:
+            return plot_xyz([self.x], [self.y], [self.z], color, size)
+
 
 class Observer:
     """
@@ -207,7 +230,12 @@ class Observer:
         declination
     url : str
         url of NASA's JPL Horizons that procuded the results 
+    
+    Methods
+    -------
+    plot : plots the polar coordinates (RA,DEC) of the target body.
     """
+    
     def __init__(self, target, t1, t2=None, step=None, center='500@399', quantities=2):
         self.target = target
         self.center = center
@@ -331,3 +359,23 @@ class Observer:
             tmp_ls = [float(i.strip()) for i in p]
             pos_list.append(tmp_ls)
         return [error_msg, times, np.array(pos_list)]
+
+    def plot(self, color='b', size=10):
+        """
+        plots the polar coordinates (RA,DEC) of the target body.
+        
+        Arguments
+        ----------
+        color : str
+            color of body
+        size : int
+            size of body
+        
+        Returns
+        -------
+        matplotlib.axes.Axes object
+        """
+        if isinstance(self.time, list):
+            return plot_radec(self.ra, self.dec, color, size)
+        else:
+            return plot_radec([self.ra], [self.dec], color, size)
