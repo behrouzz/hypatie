@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
 import numpy as np
-from .plots import plot_radec, plot_xyz
+from .plots import plot_altaz, plot_xyz
 
 BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
 
@@ -362,7 +362,7 @@ class Observer:
 
     def plot(self, color='b', size=10):
         """
-        plots the polar coordinates (RA,DEC) of the target body.
+        plots the polar coordinates (Alt,Az) of the target body.
         
         Arguments
         ----------
@@ -375,7 +375,4 @@ class Observer:
         -------
         matplotlib.axes.Axes object
         """
-        if isinstance(self.time, list):
-            return plot_radec(self.ra, self.dec, color, size)
-        else:
-            return plot_radec([self.ra], [self.dec], color, size)
+        plot_altaz(self.ra, self.dec, color, size)
