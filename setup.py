@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="hypatie",
-    version="1.2.0",
+    version="1.2.1",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
     description="A python package for querying NASA's JPL HORIZONS API",

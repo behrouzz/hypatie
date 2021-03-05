@@ -23,7 +23,7 @@ def radec_to_altaz(t, lon, lat, ra, dec):
     alt = np.arcsin(zhor)*r2d
     return alt, az
 
-def altaz_to_radec(t, long, lat, az, alt):
+def altaz_to_radec(t, lon, lat, az, alt):
     """Convert AltAz to RaDec"""
     d2r = np.pi/180
     r2d = 180/np.pi
@@ -48,7 +48,7 @@ def altaz_to_radec(t, long, lat, az, alt):
     J2000 = datetime(2000,1,1,12)
     d = (t - J2000).total_seconds() / 86400
     UT = t.hour + t.minute/60 + t.second/3600
-    LST = (100.46 + 0.985647 * d + long + 15*UT + 360) % 360
+    LST = (100.46 + 0.985647 * d + lon + 15*UT + 360) % 360
 
     if az >= 180: #target is at west of observer meridan
         ra = (LST - ha) % 360

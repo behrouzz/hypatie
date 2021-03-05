@@ -1,3 +1,6 @@
 from .core import *
 from .animation import *
-__version__ = "1.2.0"
+from .plots import *
+from .transform import *
+
+__version__ = "1.2.1"
