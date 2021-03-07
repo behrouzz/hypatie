@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="hypatie",
-    version="2.0.2",
+    version="2.1.0",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
     description="A python package for astronomy",

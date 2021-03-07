@@ -37,10 +37,8 @@ def altaz_to_radec(t, lon, lat, az, alt):
 
     cos_HA = (np.sin(ALT) - np.sin(LAT)*np.sin(DEC)) / \
              (np.cos(LAT)*np.cos(DEC))
-    if cos_HA > 1: #problem of python!
-        HA = 0
-    else:
-        HA = np.arccos(cos_HA)
+    
+    HA = np.where(cos_HA>1, 0, np.arccos(cos_HA))
 
     dec = DEC * r2d
     ha  = HA  * r2d
@@ -50,10 +48,7 @@ def altaz_to_radec(t, lon, lat, az, alt):
     UT = t.hour + t.minute/60 + t.second/3600
     LST = (100.46 + 0.985647 * d + lon + 15*UT + 360) % 360
 
-    if az >= 180: #target is at west of observer meridan
-        ra = (LST - ha) % 360
-    else: #target is at east of observer meridan
-        ra = (LST + ha) % 360
+    ra = np.where(az>=180, (LST-ha)%360, (LST+ha)%360)
 
     return ra, dec
 
