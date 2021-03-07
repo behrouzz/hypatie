@@ -59,16 +59,12 @@ BASE_SIMBAD = 'http://simbad.u-strasbg.fr/simbad/sim-tap/sync?\
 request=doQuery&lang=adql&format=json&query='
 
 
-def get_objects(ra, dec, otype=None, n_max=1000):
+def get_objects(otype=None, n_max=1000):
     """
     Retrieve deep-sky objects
     
     Arguments
     ---------
-    ra : int
-        Right Ascension
-    dec : int
-        Declination
     otype : str
         object type. Can be the 8-digit code number defined by SIMBAD
         in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
@@ -86,14 +82,13 @@ def get_objects(ra, dec, otype=None, n_max=1000):
     
     if otype is not None:
         otype = str(tuple(object_type(otype)))
-        add_otype = f" AND otype_txt in {otype}"
+        add_otype = f" WHERE otype_txt in {otype}"
     else:
         add_otype = ""
     
     sql = f"""SELECT TOP {n_max} main_id, otypedef.otype_longname, allfluxes.V, ra, dec
     FROM basic LEFT JOIN allfluxes ON basic.oid=allfluxes.oidref
-    LEFT JOIN otypedef ON basic.otype=otypedef.otype
-    WHERE ra IS NOT NULL"""+add_otype+" ORDER BY V"
+    LEFT JOIN otypedef ON basic.otype=otypedef.otype"""+add_otype+" ORDER BY V"
     sql = ' '.join([i.strip() for i in sql.split('\n')])
     url = (BASE_SIMBAD+sql).replace(' ', '%20')
     r = json.loads(urlopen(url).read().decode('utf-8'))
