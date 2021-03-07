@@ -3,6 +3,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
 
+def _equalize_scale(X,Y,Z, ax):
+    max_range = np.array([X.max()-X.min(), Y.max()-Y.min(), Z.max()-Z.min()]).max()
+    Xb = 0.5*max_range*np.mgrid[-1:2:2,-1:2:2,-1:2:2][0].flatten() + 0.5*(X.max()+X.min())
+    Yb = 0.5*max_range*np.mgrid[-1:2:2,-1:2:2,-1:2:2][1].flatten() + 0.5*(Y.max()+Y.min())
+    Zb = 0.5*max_range*np.mgrid[-1:2:2,-1:2:2,-1:2:2][2].flatten() + 0.5*(Z.max()+Z.min())
+    for xb, yb, zb in zip(Xb, Yb, Zb):
+       ax.plot([xb], [yb], [zb], 'w')
+    return ax
+
 def plot_xyz(x, y, z, color, size):
     """cartesian plot"""
     fig = plt.figure(figsize=plt.figaspect(0.5)*1.2)
@@ -13,7 +22,9 @@ def plot_xyz(x, y, z, color, size):
     ax.tick_params(axis='x', labelsize=8)
     ax.tick_params(axis='y', labelsize=8)
     ax.tick_params(axis='z', labelsize=8)
-    ax.scatter(x,y,z, c=color, s=size)
+    au = 149597870700.0
+    ax.scatter(x/au, y/au, z/au, c=color, s=size)
+    ax = _equalize_scale(x/au, y/au, z/au, ax)
     return ax
 
 def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=None):

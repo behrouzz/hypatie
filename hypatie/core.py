@@ -33,7 +33,7 @@ class Vector:
         number of time intervals
     center: str
         origin of coordinates. format: site@body (default '500@0')
-    reg_plane: str
+    ref_plane: str
         refrence plane. can be 'FRAME', 'ECLIPTIC' or 'BODY EQUATOR' (default 'FRAME')
     vec_table: int:
         vector table type: enter 1 for position; 2 for position and velocity
