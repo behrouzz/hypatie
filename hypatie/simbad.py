@@ -58,6 +58,50 @@ def object_type(num):
 BASE_SIMBAD = 'http://simbad.u-strasbg.fr/simbad/sim-tap/sync?\
 request=doQuery&lang=adql&format=json&query='
 
+
+def get_objects(ra, dec, otype=None, n_max=1000):
+    """
+    Retrieve deep-sky objects
+    
+    Arguments
+    ---------
+    ra : int
+        Right Ascension
+    dec : int
+        Declination
+    otype : str
+        object type. Can be the 8-digit code number defined by SIMBAD
+        in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
+        such as '14.06.16.00' for White Dwarf, or one of these values:
+        'radiation', 'gravitation', 'candidate', 'multiple', 'interstellar',
+        'star' or 'galaxy'.
+    n_max : int
+        maximum number of rows to return
+
+    Returns
+    -------
+    list : data field names
+    list : rows of data 
+    """
+    
+    if otype is not None:
+        otype = str(tuple(object_type(otype)))
+        add_otype = f" AND otype_txt in {otype}"
+    else:
+        add_otype = ""
+    
+    sql = f"""SELECT TOP {n_max} main_id, otypedef.otype_longname, allfluxes.V, ra, dec
+    FROM basic LEFT JOIN allfluxes ON basic.oid=allfluxes.oidref
+    LEFT JOIN otypedef ON basic.otype=otypedef.otype
+    WHERE ra IS NOT NULL"""+add_otype+" ORDER BY V"
+    sql = ' '.join([i.strip() for i in sql.split('\n')])
+    url = (BASE_SIMBAD+sql).replace(' ', '%20')
+    r = json.loads(urlopen(url).read().decode('utf-8'))
+    field_names = [dc['name'] for dc in r['metadata']]
+    rows = r['data']
+    return field_names, rows
+
+
 def explore_region(ra, dec, r, n_max=1000):
     """
     explore a circular region in universe in ICRS coordinates
@@ -117,65 +161,6 @@ def search_region(ra, dec, r, otype=None, n_max=1000):
     LEFT JOIN otypedef ON basic.otype=otypedef.otype
     WHERE CONTAINS(POINT('ICRS', ra, dec), CIRCLE('ICRS', {ra}, {dec}, {r})) = 1
     AND ra IS NOT NULL AND dec IS NOT NULL"""+add_otype+" ORDER BY V"
-    sql = ' '.join([i.strip() for i in sql.split('\n')])
-    url = (BASE_SIMBAD+sql).replace(' ', '%20')
-    r = json.loads(urlopen(url).read().decode('utf-8'))
-    field_names = [dc['name'] for dc in r['metadata']]
-    rows = r['data']
-    return field_names, rows
-
-
-def sky(lon, lat, t=None, otype=None, n_max=1000):
-    """
-    visible sky
-
-    Arguments
-    ---------
-    lon : int
-        longtitude of observer location
-    lat : int
-        latitude of observer location
-    t : datetime or str in format '%Y-%m-%d %H:%M:%S'
-        time of observation in UTC. default now.
-    otype : str
-        object type. Can be the 8-digit code number defined by SIMBAD
-        in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
-        such as '14.06.16.00' for White Dwarf, or one of these values:
-        'radiation', 'gravitation', 'candidate', 'multiple', 'interstellar',
-        'star' or 'galaxy'.
-    n_max : int
-        maximum number of rows to return
-
-    Returns
-    -------
-    list : data field names
-    list : rows of data 
-    """
-    
-    if t is None:
-        t = datetime.utcnow()
-    elif isinstance(t, datetime):
-        pass
-    elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
-        t = datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
-    else:
-        raise Exception("t should be a datetime or str: '%Y-%m-%d %H:%M:%S'")
-
-    az = np.linspace(0, 360, 1000)
-    alt = np.linspace(0, 90, 1000)
-    ra, dec = altaz_to_radec(t, lon, lat, az, alt)
-    
-    if otype is not None:
-        otype = str(tuple(object_type(otype)))
-        add_otype = f" AND (otype_txt in {otype})"
-    else:
-        add_otype = ""
-    
-    sql = f"""SELECT TOP {n_max} main_id, otypedef.otype_longname, allfluxes.V, ra, dec
-    FROM basic LEFT JOIN allfluxes ON basic.oid=allfluxes.oidref
-    LEFT JOIN otypedef ON basic.otype=otypedef.otype
-    WHERE (ra BETWEEN {min(ra)} AND {max(ra)}) AND
-    (dec BETWEEN {min(dec)} AND {max(dec)})"""+add_otype+" ORDER BY V"
     sql = ' '.join([i.strip() for i in sql.split('\n')])
     url = (BASE_SIMBAD+sql).replace(' ', '%20')
     r = json.loads(urlopen(url).read().decode('utf-8'))
