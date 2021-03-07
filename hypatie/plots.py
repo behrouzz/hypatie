@@ -12,7 +12,7 @@ def _equalize_scale(X,Y,Z, ax):
        ax.plot([xb], [yb], [zb], 'w')
     return ax
 
-def plot_xyz(x, y, z, color, size):
+def plot_xyz(x, y, z, color, size, au=False):
     """cartesian plot"""
     fig = plt.figure(figsize=plt.figaspect(0.5)*1.2)
     ax = fig.add_subplot(111, projection='3d')
@@ -22,7 +22,7 @@ def plot_xyz(x, y, z, color, size):
     ax.tick_params(axis='x', labelsize=8)
     ax.tick_params(axis='y', labelsize=8)
     ax.tick_params(axis='z', labelsize=8)
-    au = 149597870700.0
+    au = 149597870700.0 if au else 1
     ax.scatter(x/au, y/au, z/au, c=color, s=size)
     ax = _equalize_scale(x/au, y/au, z/au, ax)
     return ax
