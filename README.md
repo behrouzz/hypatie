@@ -2,7 +2,7 @@
 **License:** [MIT](https://opensource.org/licenses/MIT)<br/>
 
 # hypatie
-*A python package for querying NASA's JPL HORIZONS API*
+*A python package for astronomy*
 
 
 ## Installation
