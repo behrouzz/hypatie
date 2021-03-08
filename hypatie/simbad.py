@@ -265,5 +265,5 @@ def search_sky(lon, lat, t=None, az=0, alt=90, r=1, otype=None, n_max=1000):
     else:
         raise Exception("t should be a datetime or str: '%Y-%m-%d %H:%M:%S'")
     
-    ra, dec = altaz_to_radec(t, lon, lat, az, alt)
+    ra, dec = altaz_to_radec(lon, lat, az, alt, t)
     return search_region(ra=ra, dec=dec, r=r, otype=otype, n_max=n_max)

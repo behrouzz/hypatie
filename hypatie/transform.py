@@ -1,10 +1,26 @@
 import numpy as np
 from datetime import datetime
+from collections.abc import Iterable
 
-def radec_to_altaz(t, lon, lat, ra, dec):
+def _time(t):
+    if isinstance(t, datetime):
+        return t
+    elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
+        return datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+    elif t is None:
+        return datetime.utcnow()
+    else:
+        raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
+
+def radec_to_altaz(lon, lat, ra, dec, t=None):
     """Convert RaDec to AltAz"""
+    t = _time(t)
     d2r = np.pi/180
     r2d = 180/np.pi
+
+    if isinstance(ra, Iterable):
+        ra = np.array(ra)
+        dec = np.array(dec)
 
     J2000 = datetime(2000,1,1,12)
     d = (t - J2000).total_seconds() / 86400 #day offset
@@ -23,10 +39,16 @@ def radec_to_altaz(t, lon, lat, ra, dec):
     alt = np.arcsin(zhor)*r2d
     return alt, az
 
-def altaz_to_radec(t, lon, lat, az, alt):
+def altaz_to_radec(lon, lat, az, alt, t=None):
     """Convert AltAz to RaDec"""
+
+    t = _time(t)
     d2r = np.pi/180
     r2d = 180/np.pi
+
+    if isinstance(az, Iterable):
+        az = np.array(az)
+        alt = np.array(alt)
 
     ALT = alt * d2r
     AZ  = az  * d2r

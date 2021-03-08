@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
+from .simbad import bright_objects
 
 def _equalize_scale(X,Y,Z, ax):
     max_range = np.array([X.max()-X.min(), Y.max()-Y.min(), Z.max()-Z.min()]).max()
@@ -52,8 +53,10 @@ def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=
         ax = fig.add_axes([0.1,0.1,0.8,0.8], polar=True)
         ax.set_theta_zero_location('N')
         ax.set_rlim(90, 0, 1)
-        ax.set_yticks(np.arange(0,91,15))
-        ax.set_yticklabels(ax.get_yticks()[::-1])
+        ax.set_yticks(np.arange(0,91,30))
+        ax.set_yticklabels([])
+        ax.tick_params(axis=u'both', which=u'both',length=0)
+        #ax.set_yticklabels(ax.get_yticks()[::-1])
     if matplotlib.__version__ < '3.0.0':
         alt = [90-i for i in alt]
     ax.scatter(az, alt, c=color, s=size, alpha=alpha, marker=marker)
@@ -89,4 +92,14 @@ def plot_radec(ra, dec, mag=None, size=None):
     plt.subplots_adjust(top=0.95,bottom=0.0)
     plt.xlabel('RA')
     plt.ylabel('Dec')
+    return ax
+
+def star_chart(lon, lat, t=None, otype=None):
+    """plot the star chart for a location and time on earth"""
+    _, rows = bright_objects(otype)
+    mag = [i[2] for i in rows]
+    ra  = [i[3] for i in rows]
+    dec = [i[4] for i in rows]
+    alt, az = hp.radec_to_altaz(lon, lat, ra, dec, t)
+    ax = hp.plot_altaz(az, alt, mag=mag)
     return ax
