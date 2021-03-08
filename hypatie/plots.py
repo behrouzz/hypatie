@@ -83,13 +83,12 @@ def plot_radec(ra, dec, mag=None, size=None):
         if mag is None:
             size = [5] * len(ra)
         else:
-            size = 0.1 + max(mag)-mag
+            size = (0.1 + max(mag)-mag)**1.8
 
     fig = plt.figure(figsize=(10,5))
     ax = fig.add_subplot(111, projection="aitoff")
     ax.grid(True)
-    for i in range(len(ra)):
-        ax.plot(ra[i], dec[i], 'o', markersize=size[i], c='k')
+    ax.scatter(ra, dec, s=size, c='k')
     plt.subplots_adjust(top=0.95,bottom=0.0)
     plt.xlabel('RA')
     plt.ylabel('Dec')
