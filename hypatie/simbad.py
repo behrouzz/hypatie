@@ -55,6 +55,39 @@ def object_type(num):
     return otypes
 
 
+def bright_objects(otype=None):
+    """deep-sky objects with apparent magnitude less than 4.5
+
+    Arguments
+    ---------
+    otype : str
+        object type. Can be the 8-digit code number defined by SIMBAD
+        in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
+        such as '14.06.16.00' for White Dwarf, or one of these values:
+        'radiation', 'gravitation', 'candidate', 'multiple', 'interstellar',
+        'star' or 'galaxy'.
+
+    Returns
+    -------
+    list : data field names
+    list : rows of data
+    """
+    
+    from .simbad_bright_objects import mag45
+    f_mag45 = StringIO(mag45)
+    rows_mag45 = []
+    for row in csv.reader(f_mag45):
+        rows_mag45.append(row)
+    rows = [[i[0], i[1], float(i[2]), float(i[3]), float(i[4])] \
+          for i in rows_mag45]
+    if otype is not None:
+        otype = object_type(otype)
+        rows = [i for i in rows if i[1] in otype]
+    field_names = ['main_id', 'otype_txt', 'V', 'ra', 'dec']
+    return field_names, rows
+    
+
+
 BASE_SIMBAD = 'http://simbad.u-strasbg.fr/simbad/sim-tap/sync?\
 request=doQuery&lang=adql&format=json&query='
 
