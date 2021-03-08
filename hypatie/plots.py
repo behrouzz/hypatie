@@ -3,6 +3,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
 from .simbad import bright_objects
+from .transform import radec_to_altaz
 
 def _equalize_scale(X,Y,Z, ax):
     max_range = np.array([X.max()-X.min(), Y.max()-Y.min(), Z.max()-Z.min()]).max()
@@ -100,6 +101,6 @@ def star_chart(lon, lat, t=None, otype=None):
     mag = [i[2] for i in rows]
     ra  = [i[3] for i in rows]
     dec = [i[4] for i in rows]
-    alt, az = hp.radec_to_altaz(lon, lat, ra, dec, t)
-    ax = hp.plot_altaz(az, alt, mag=mag)
+    alt, az = radec_to_altaz(lon, lat, ra, dec, t)
+    ax = plot_altaz(az, alt, mag=mag)
     return ax
