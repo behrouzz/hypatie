@@ -2,12 +2,12 @@
 **License:** [MIT](https://opensource.org/licenses/MIT)<br/>
 
 # hypatie
-*A python package for astronomy*
+*A python package for astronomical calculations*
 
 
 ## Installation
 
-You can install the latest version of *hypatie* from [PyPI](https://pypi.org/project/hypatie/):
+Install the latest version of *hypatie* from [PyPI](https://pypi.org/project/hypatie/):
 
     pip install hypatie
 
