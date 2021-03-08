@@ -1,6 +1,7 @@
 import numpy as np
 from datetime import datetime
 from collections.abc import Iterable
+import re
 
 def _time(t):
     if isinstance(t, datetime):
