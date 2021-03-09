@@ -1,3 +1,8 @@
+"""
+Module animation
+================
+This module supplies one function, play() to play animation.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -5,28 +10,23 @@ from mpl_toolkits.mplot3d import Axes3D, proj3d
 
 def play(bodies, names, colors, sizes, path=True, legend=True, interval=20):
     """
-    Plays animation from positions.
+    Plays animation from positions of several bodies.
     
     Arguments
     ---------
-    bodies : list
-        targer bodies returned from Vector or Observer classes
-    names : list
-        name of bodies
-    colors : list
-        color of bodies
-    sizes : list
-        size of bodies
-    path : bool
-        whether or not draw the trajectory path of bodies; default True.
-    legend : bool
-        legend of the plot; default True.
-    interval : int
-        time interval between sequences, greater means slower. default 20.
+        bodies (list): targer bodies returned from Vector or Observer classes
+        names (list): name of bodies
+        colors (list): color of bodies
+        sizes (list): size of bodies
+        path (bool): whether or not draw the trajectory path of bodies;
+                     default True.
+        legend (bool): legend of the plot; default True.
+        interval (int): time interval between sequences, greater means slower.
+                        default 20.
 
     Returns
     -------
-    matplotlib.animation.FuncAnimation object
+        matplotlib.animation.FuncAnimation object
     """
     
     for b in bodies:

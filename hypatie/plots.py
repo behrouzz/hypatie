@@ -1,3 +1,8 @@
+"""
+Module plot
+================
+This module supplies several functions for plotting reasons.
+"""
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -6,6 +11,20 @@ from .simbad import bright_objects
 from .transform import radec_to_altaz
 
 def _equalize_scale(X,Y,Z, ax):
+    """
+    equlize scales of x, y and z axis
+
+    Arguments
+    ---------
+        X (np.array): x values
+        Y (np.array): y values
+        Z (np.array): z values
+        ax (axes): axes object
+
+    Returns
+    -------
+        matplotlib axes object
+    """
     max_range = np.array([X.max()-X.min(), Y.max()-Y.min(), Z.max()-Z.min()]).max()
     Xb = 0.5*max_range*np.mgrid[-1:2:2,-1:2:2,-1:2:2][0].flatten() + 0.5*(X.max()+X.min())
     Yb = 0.5*max_range*np.mgrid[-1:2:2,-1:2:2,-1:2:2][1].flatten() + 0.5*(Y.max()+Y.min())
@@ -15,7 +34,22 @@ def _equalize_scale(X,Y,Z, ax):
     return ax
 
 def plot_xyz(x, y, z, color, size, au=False):
-    """cartesian plot"""
+    """
+    draw 3d cartesian plot of a body
+
+    Arguments
+    ---------
+        x (np.array): x values
+        y (np.array): y values
+        z (np.array): z values
+        color (str): color
+        size (int): size
+        au (bool): whether or not in AU unit; default False.
+
+    Returns
+    -------
+        matplotlib axes object
+    """
     fig = plt.figure(figsize=plt.figaspect(0.5)*1.2)
     ax = fig.add_subplot(111, projection='3d')
     ax.set_xlabel('X')
@@ -30,7 +64,24 @@ def plot_xyz(x, y, z, color, size, au=False):
     return ax
 
 def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=None):
-    """plot altitude/azimuth coordinates"""
+    """
+    plot positions of bodies based on altitude/azimuth coordinates
+
+    Arguments
+    ---------
+        az (iter of int): azimuth values
+        alt (iter of int): altitude values
+        mag (iter of int): apparent magnitudes; default None.
+        size (int): size; default None.
+        color (str): color; default 'k'.
+        alpha (int): alpha value (transparency), between 0 and 1; default 1.
+        marker (str): marker shape; default 'o'.
+        ax (axes): axes object; default None.
+
+    Returns
+    -------
+        matplotlib axes object
+    """
 
     if isinstance(az, Iterable):
         az = np.array(az)
@@ -55,9 +106,9 @@ def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=
         ax.set_theta_zero_location('N')
         ax.set_rlim(90, 0, 1)
         ax.set_yticks(np.arange(0,91,30))
-        ax.set_yticklabels([])
+        ax.set_xticks([0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi, 5*np.pi/4, 6*np.pi/4, 7*np.pi/4])
+        ax.set_xticklabels(['N','NE','E','SE','S','SW','W','NW'])
         ax.tick_params(axis=u'both', which=u'both',length=0)
-        #ax.set_yticklabels(ax.get_yticks()[::-1])
     if matplotlib.__version__ < '3.0.0':
         alt = [90-i for i in alt]
     ax.scatter(az, alt, c=color, s=size, alpha=alpha, marker=marker)
@@ -65,7 +116,20 @@ def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=
     return ax
 
 def plot_radec(ra, dec, mag=None, size=None):
-    """plot ra dec coordinates"""
+    """
+    plot positions of bodies based on RA/Dec coordinates
+
+    Arguments
+    ---------
+        ra (iter of int): Right Ascension values
+        dec (iter of int): Declination values
+        mag (iter of int): apparent magnitudes; default None.
+        size (int): size; default None.
+
+    Returns
+    -------
+        matplotlib axes object
+    """
         
     if isinstance(ra, Iterable):
         ra = np.array(ra)
@@ -95,7 +159,20 @@ def plot_radec(ra, dec, mag=None, size=None):
     return ax
 
 def star_chart(lon, lat, t=None, otype=None):
-    """plot the star chart for a location and time on earth"""
+    """
+    plot the star chart for a location and time on earth
+
+    Arguments
+    ---------
+        lon (int): longitude of observer
+        lat (int): latitude of observer
+        t (datetime or str): time of observation; default None.
+        otype (str): object type to be presented in the chart; default None.
+
+    Returns
+    -------
+        matplotlib axes object
+    """
     _, rows = bright_objects(otype)
     mag = [i[2] for i in rows]
     ra  = [i[3] for i in rows]
