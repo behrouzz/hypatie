@@ -69,12 +69,12 @@ def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=
 
     Arguments
     ---------
-        az (iter of int): azimuth values
-        alt (iter of int): altitude values
-        mag (iter of int): apparent magnitudes; default None.
+        az (iter of float): azimuth values
+        alt (iter of float): altitude values
+        mag (iter of float): apparent magnitudes; default None.
         size (int): size; default None.
         color (str): color; default 'k'.
-        alpha (int): alpha value (transparency), between 0 and 1; default 1.
+        alpha (float): alpha value (transparency), between 0 and 1; default 1.
         marker (str): marker shape; default 'o'.
         ax (axes): axes object; default None.
 
@@ -121,9 +121,9 @@ def plot_radec(ra, dec, mag=None, size=None):
 
     Arguments
     ---------
-        ra (iter of int): Right Ascension values
-        dec (iter of int): Declination values
-        mag (iter of int): apparent magnitudes; default None.
+        ra (iter of float): Right Ascension values
+        dec (iter of float): Declination values
+        mag (iter of float): apparent magnitudes; default None.
         size (int): size; default None.
 
     Returns
@@ -164,8 +164,8 @@ def star_chart(lon, lat, t=None, otype=None):
 
     Arguments
     ---------
-        lon (int): longitude of observer
-        lat (int): latitude of observer
+        lon (float): longitude of observer
+        lat (float): latitude of observer
         t (datetime or str): time of observation; default None.
         otype (str): object type to be presented in the chart; default None.
 
