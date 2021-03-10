@@ -1,3 +1,14 @@
+"""
+Module horizons
+===============
+This module has two classes (Vector and Observer) to return positions
+of the solar sytem objects by querying NASA's JPL Horizons API.
+
+The Vector class provides positions with three dimensions: x,y,z.
+
+The Observer class provides positions with two dimensions: ra,dec or
+alt,az; depending on the request.
+"""
 import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
@@ -6,7 +17,7 @@ from .plots import plot_altaz, plot_xyz
 
 BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
 
-def _time_format(t):
+def _time_format(t): #check time format
     correct = True
     if isinstance(t, datetime):
         t = t.isoformat()[:19]
@@ -23,47 +34,35 @@ class Vector:
     
     Parameters
     ----------
-    target : str
-        targer body
-    t1 : datetime or str in format '%Y-%m-%d %H:%M:%S'
-        time from which to request data
-    t2 : datetime or str in format '%Y-%m-%d %H:%M:%S'
-        time to which to request data
-    steps: int
-        number of time intervals
-    center: str
-        origin of coordinates. format: site@body (default '500@0')
-    ref_plane: str
-        refrence plane. can be 'FRAME', 'ECLIPTIC' or 'BODY EQUATOR' (default 'FRAME')
-    vec_table: int:
-        vector table type: enter 1 for position; 2 for position and velocity
+        ttarget (str): targer body
+        t1 (datetime or str): time from which to request data
+        t2 (datetime or str): time to which to request data
+        step (int): number of time intervals
+        center (str): origin of coordinates. format: site@body
+                      default '500@0'
+        ref_plane (str): refrence plane: 'FRAME', 'ECLIPTIC' or 'BODY EQUATOR'
+                         default 'FRAME' (equator plane)
+        vec_table (int): vector table type: 1 for position; 2 for position and velocity
     
     Attributes
     ----------
-    time : list of datetime objects
-        each element of list is the time at which the coordinates is presented
-    pos : numpy array with shape (n, 3); n: number of steps
-        coordinates array with three columns (x, y, z)
-    x : numpy array with shape (n,); n: number of steps
-        x component of position vector(s)
-    y : numpy array with shape (n,); n: number of steps
-        y component of position vector(s)
-    z : numpy array with shape (n,); n: number of steps
-        z component of position vector(s)
-    vel : numpy array with shape (n, 3); n: number of steps
-        velocity array with three columns (vx, vy, vz)
-    vx : numpy array with shape (n,); n: number of steps
-        x component of velocity vector(s)
-    vy : numpy array with shape (n,); n: number of steps
-        y component of velocity vector(s)
-    vz : numpy array with shape (n,); n: number of steps
-        z component of velocity vector(s)
-    url : str
-        url of NASA's JPL Horizons that procuded the results
+        time (list): list of datetime objects; each element is the time
+                     at which the coordinates is presented
+        pos (np.array): coordinates array with three columns (x, y, z)
+                        shape of array is (n, 3); n: number of steps
+        x (np.array): x component of position vector
+        y (np.array): y component of position vector
+        z (np.array): z component of position vector
+        vel (np.array): velocity array with three columns (vx, vy, vz)
+                        shape of array is (n, 3); n: number of steps
+        vx (np.array): x component of velocity vector
+        vy (np.array): y component of velocity vector
+        vz (np.array): z component of velocity vector
+        url (str): url of NASA's JPL Horizons that produced the results
     
     Methods
     -------
-    plot : plots the cartesian coordinates (x,y,z) of the target body.
+        plot: plot position(s) (x,y,z) of the target body
     """
 
     def __init__(self, target, t1, t2=None, step=None, center='500@0', ref_plane='FRAME', vec_table=1):
@@ -117,7 +116,6 @@ class Vector:
             raise Exception('\n'+error_msg[:-2])
 
     def vector_url(self, target, t1, t2, step, center, ref_plane, vec_table):
-        """Returns cartesian vector of a target body"""
         params = f"""COMMAND='{target}'
         CENTER='{center}'
         MAKE_EPHEM='YES'
@@ -180,18 +178,16 @@ class Vector:
 
     def plot(self, color='b', size=10):
         """
-        plots the cartesian coordinates (x,y,z) of the target body.
+        plot position(s) (ra/dec or az/alt) of the target body
         
         Arguments
         ----------
-        color : str
-            color of body
-        size : int
-            size of body
+            color (str): color of body
+            size (int): size of body
         
         Returns
         -------
-        matplotlib.axes.Axes object
+            matplotlib.axes.Axes object
         """
         if isinstance(self.time, list):
             return plot_xyz(self.x, self.y, self.z, color, size)
@@ -201,39 +197,31 @@ class Vector:
 
 class Observer:
     """
-    Observer type coordinates (RA and DEC)
+    Observer type coordinates (ra/dec or az/alt)
     
     Parameters
     ----------
-    target : str
-        targer body
-    t1 : datetime or str in format '%Y-%m-%d %H:%M:%S'
-        time from which to request data
-    t2 : datetime or str in format '%Y-%m-%d %H:%M:%S'
-        time to which to request data
-    steps: int
-        number of time intervals
-    center: str
-        Observer location. format: site@body (default '500@399')
-    quantities: int:
-        enter 1 for astrometric RA & DEC and 2 for apparent RA & DEC (default 2)
+        ttarget (str): targer body
+        t1 (datetime or str): time from which to request data
+        t2 (datetime or str): time to which to request data
+        step (int): number of time intervals
+        center (str): origin of coordinates. format: site@body
+                      default '500@0'
+        quantities (int): 1 for ra/dec, 2 for az/alt; (default 2)
     
     Attributes
     ----------
-    time : list of datetime objects
-        each element of list is the time at which the coordinates is presented
-    pos : numpy array with shape (n, 2); n: number of steps
-        coordinates array with two columns (RA & DEC)
-    ra : numpy array with shape (n,); n: number of steps
-        right ascension
-    dec : numpy array with shape (n,); n: number of steps
-        declination
-    url : str
-        url of NASA's JPL Horizons that procuded the results 
+        time (list): list of datetime objects; each element is the time
+                     at which the coordinates is presented
+        pos (np.array): coordinates array with two columns (ra/dec or az/alt)
+                        shape of array is (n, 2); n: number of steps
+        ra (np.array): right ascension OR azimuth (depending on quantities chosen)
+        dec (np.array): declination OR altitude (depending on quantities chosen)
+        url (str): url of NASA's JPL Horizons that produced the results
     
     Methods
     -------
-    plot : plots the polar coordinates (RA,DEC) of the target body.
+        plot: plot position(s) (ra/dec or az/alt) of the target body
     """
     
     def __init__(self, target, t1, t2=None, step=None, center='500@399', quantities=2):
@@ -299,7 +287,6 @@ class Observer:
         return [valid_center, str_center]
     
     def observer_url(self, target, t1, t2, step, center, quantities, skip_daylight=True):
-        """Returns RA, DEC of target body"""
         if len(center.split(',')) > 1: #coordinates
             valid_center, center = self.coord(center)
             skip_daylight = False
@@ -362,17 +349,15 @@ class Observer:
 
     def plot(self, color='b', size=10):
         """
-        plots the polar coordinates (Alt,Az) of the target body.
+        plot position(s) (ra/dec or az/alt) of the target body
         
         Arguments
         ----------
-        color : str
-            color of body
-        size : int
-            size of body
+            color (str): color of body
+            size (int): size of body
         
         Returns
         -------
-        matplotlib.axes.Axes object
+            matplotlib.axes.Axes object
         """
         plot_altaz(self.ra, self.dec, color, size)
