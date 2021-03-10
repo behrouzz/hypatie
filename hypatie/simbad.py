@@ -1,3 +1,26 @@
+"""
+Module simbad
+=============
+This module deals with deep-sky objects by querying SIMBAD astronomical
+database from Centre de données astronomiques de Strasbourg (CDS).
+
+Note about otype
+----------------
+Several functions in this module have a parameter 'otype'. This is the
+type of deep-sky object defined by SIMBAD in this url:
+http://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
+
+This a hierarchical classification. For exact type of an object, you
+shoud enter its numeric code as a string, such as '14.09.05.03' for
+Cepheid variable Star. You can also enter '14.09.05' for all Pulsating
+variable Stars (including cepheids and other Pulsating variable Stars
+subclasses). If you enter '14.09.00.00' or '14.09' (they are same), it
+means all types of variable stars.
+
+For simplicity, we have also provided 7 string values ('radiation',
+'gravitation', 'candidate', 'multiple', 'interstellar', 'star' and
+'galaxy'). Theses are general categories which encompass many subcategories. 
+"""
 import numpy as np
 from urllib.request import urlopen
 import json, csv, re
@@ -56,21 +79,16 @@ def object_type(num):
 
 
 def bright_objects(otype=None):
-    """deep-sky objects with apparent magnitude less than 4.5
+    """
+    Return Deep-sky objects with apparent magnitudes less than 4.5
 
     Arguments
     ---------
-    otype : str
-        object type. Can be the 8-digit code number defined by SIMBAD
-        in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
-        such as '14.06.16.00' for White Dwarf, or one of these values:
-        'radiation', 'gravitation', 'candidate', 'multiple', 'interstellar',
-        'star' or 'galaxy'.
+        otype (str): type of object. Default None of all objects
 
     Returns
     -------
-    list : data field names
-    list : rows of data
+        Two lists : data field names, rows of data
     """
     
     from .simbad_bright_objects import mag45
@@ -94,23 +112,16 @@ request=doQuery&lang=adql&format=json&query='
 
 def get_objects(otype=None, n_max=1000):
     """
-    Retrieve deep-sky objects
-    
+    Return deep-sky objects
+
     Arguments
     ---------
-    otype : str
-        object type. Can be the 8-digit code number defined by SIMBAD
-        in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
-        such as '14.06.16.00' for White Dwarf, or one of these values:
-        'radiation', 'gravitation', 'candidate', 'multiple', 'interstellar',
-        'star' or 'galaxy'.
-    n_max : int
-        maximum number of rows to return
+        otype (str): type of object. Default None of all objects
+        n_max (int): maximum number of rows to return; default 1000
 
     Returns
     -------
-    list : data field names
-    list : rows of data 
+        Two lists : data field names, rows of data
     """
     
     if otype is not None:
@@ -132,52 +143,36 @@ def get_objects(otype=None, n_max=1000):
 
 def explore_region(ra, dec, r, n_max=1000):
     """
-    explore a circular region in universe in ICRS coordinates
+    Explore a circular region in the sky with ICRS coordinates
 
     Arguments
     ---------
-    ra : int
-        Right Ascension
-    dec : int
-        Declination
-    r : int
-        radius of cirular region
-    n_max : int
-        maximum number of rows to return
+        ra (float): right ascension of the cirular region
+        dec (float): declination of the cirular region
+        r (float): radius of the cirular region in degrees
+        n_max (int): maximum number of rows to return; default 1000
 
     Returns
     -------
-    list : fild names
-    list : rows
+        Two lists : data field names, rows of data
     """
-
     return search_region(ra=ra, dec=dec, r=r, otype=None, n_max=n_max)
 
 def search_region(ra, dec, r, otype=None, n_max=1000):
     """
-    search in a circular region in universe in ICRS coordinates
+    Explore a circular region in the sky with ICRS coordinates
 
     Arguments
     ---------
-    ra : int
-        Right Ascension
-    dec : int
-        Declination
-    r : int
-        radius of cirular region
-    otype : str
-        object type. Can be the 8-digit code number defined by SIMBAD
-        in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
-        such as '14.06.16.00' for White Dwarf, or one of these values:
-        'radiation', 'gravitation', 'candidate', 'multiple', 'interstellar',
-        'star' or 'galaxy'.
-    n_max : int
-        maximum number of rows to return
+        ra (float): right ascension of the cirular region
+        dec (float): declination of the cirular region
+        r (float): radius of the cirular region in degrees
+        otype (str): type of object. Default None of all objects
+        n_max (int): maximum number of rows to return; default 1000
 
     Returns
     -------
-    list : data field names
-    list : rows of data 
+        Two lists : data field names, rows of data
     """
     if otype is not None:
         otype = str(tuple(object_type(otype)))
@@ -198,29 +193,21 @@ def search_region(ra, dec, r, otype=None, n_max=1000):
 
 def explore_sky(lon, lat, t=None, az=0, alt=90, r=1, n_max=1000):
     """
-    explore a circular region in the local sky with AltAz coordinates
+    Explore a circular region in the local sky with AltAz coordinates
 
     Arguments
     ---------
-    lon : int
-        longtitude of observer location
-    lat : int
-        latitude of observer location
-    t : datetime or str in format '%Y-%m-%d %H:%M:%S'
-        time of observation in UTC. default now.
-    az : int
-        azimouth
-    alt : int
-        altitude
-    r : int
-        radius of cirular region
-    n_max : int
-        maximum number of rows to return
+        lon (float): longtitude of observer location
+        lat (float): latitude of observer location
+        t (datetime or str): time of observation in UTC. default now.
+        az (float): azimuth of center of the circle
+        alt (float): altitude of center of the circle
+        r (float): radius of the cirular region in degrees
+        n_max (int): maximum number of rows to return; default 1000
 
     Returns
     -------
-    list : data field names
-    list : rows of data 
+        Two lists : data field names, rows of data
     """
     return search_sky(lon, lat, t, az, alt, r, otype=None, n_max=1000)
 
@@ -230,32 +217,20 @@ def search_sky(lon, lat, t=None, az=0, alt=90, r=1, otype=None, n_max=1000):
 
     Arguments
     ---------
-    lon : int
-        longtitude of observer location
-    lat : int
-        latitude of observer location
-    t : datetime or str in format '%Y-%m-%d %H:%M:%S'
-        time of observation in UTC. default now.
-    az : int
-        azimouth
-    alt : int
-        altitude
-    r : int
-        radius of cirular region
-    otype : str
-        object type. Can be the 8-digit code number defined by SIMBAD
-        in https://simbad.u-strasbg.fr/simbad/sim-display?data=otypes
-        such as '14.06.16.00' for White Dwarf, or one of these values:
-        'radiation', 'gravitation', 'candidate', 'multiple', 'interstellar',
-        'star' or 'galaxy'.
-    n_max : int
-        maximum number of rows to return
+        lon (float): longtitude of observer location
+        lat (float): latitude of observer location
+        t (datetime or str): time of observation in UTC. default now.
+        az (float): azimouth of center of the circle
+        alt (float): altitude of center of the circle
+        r (float): radius of the cirular region in degrees
+        otype (str): type of object. Default None of all objects
+        n_max (int): maximum number of rows to return; default 1000
 
     Returns
     -------
-    list : data field names
-    list : rows of data 
+        Two lists : data field names, rows of data
     """
+
     if t is None:
         t = datetime.utcnow()
     elif isinstance(t, datetime):

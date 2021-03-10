@@ -1,3 +1,9 @@
+"""
+Module transform
+=============
+This module supplies two functions (radec_to_altaz and altaz_to_radec)
+to transform between coordinates systems.
+"""
 import numpy as np
 from datetime import datetime
 from collections.abc import Iterable
@@ -14,7 +20,21 @@ def _time(t):
         raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
 
 def radec_to_altaz(lon, lat, ra, dec, t=None):
-    """Convert RaDec to AltAz"""
+    """
+    Convert ra/dec coordinates to az/alt coordinates
+
+    Arguments
+    ---------
+        lon (float): longtitude of observer location
+        lat (float): latitude of observer location
+        ra (iter of float): right ascension value(s)
+        dec (iter of float): declination value(s)
+        t (datetime or str): time of observation in UTC. default now.
+
+    Returns
+    -------
+        altitude(s), azimuth(s)
+    """
     t = _time(t)
     d2r = np.pi/180
     r2d = 180/np.pi
@@ -41,7 +61,21 @@ def radec_to_altaz(lon, lat, ra, dec, t=None):
     return alt, az
 
 def altaz_to_radec(lon, lat, az, alt, t=None):
-    """Convert AltAz to RaDec"""
+    """
+    Convert az/alt coordinates to ra/dec coordinates
+
+    Arguments
+    ---------
+        lon (float): longtitude of observer location
+        lat (float): latitude of observer location
+        az (iter of float): azimuth value(s)
+        alt (iter of float): altitude value(s)
+        t (datetime or str): time of observation in UTC. default now.
+
+    Returns
+    -------
+        right ascension value(s), declination value(s)
+    """
 
     t = _time(t)
     d2r = np.pi/180
