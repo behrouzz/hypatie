@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="hypatie",
-    version="2.4.0",
+    version="2.5.0",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
     description="A python package for astronomical calculations",
@@ -20,6 +20,6 @@ setuptools.setup(
     ],
     packages=["hypatie"],
     include_package_data=True,
-    install_requires=["numpy", "matplotlib"],
+    install_requires=["numpy", "matplotlib","pandas"],
     python_requires='>=3.4',
 )

@@ -34,7 +34,7 @@ class Vector:
     
     Parameters
     ----------
-        ttarget (str): targer body
+        target (str): targer body
         t1 (datetime or str): time from which to request data
         t2 (datetime or str): time to which to request data
         step (int): number of time intervals

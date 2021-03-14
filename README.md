@@ -11,7 +11,7 @@ Install the latest version of *hypatie* from [PyPI](https://pypi.org/project/hyp
 
     pip install hypatie
 
-The only requirements are *numpy* and *matplotlib*.
+Requirements are *numpy*, *pandas* and *matplotlib*.
 
 
 ## Quick start
@@ -114,5 +114,19 @@ sizes = [20, 8, 3]
 
 # play the animation
 anim = hp.play(bodies, names, colors, sizes)
+plt.show()
+```
+
+## Deep sky
+
+You can download data from astronomical catalogues:
+```python
+cat = Catalogue('gaia2')
+data, meta = cat.download()
+```
+
+or, plot the star chart for your location:
+```python
+ax = hp.star_chart(lon=2.2945, lat=48.8584)
 plt.show()
 ```
