@@ -8,11 +8,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
 from .simbad import bright_objects
-from .transform import radec_to_altaz
+from .transform import radec_to_altaz, altaz_to_radec
+from urllib.request import urlopen
 
 def _equalize_scale(X,Y,Z, ax):
     """
-    equlize scales of x, y and z axis
+    Equalize scales of x, y and z axis
 
     Arguments
     ---------
@@ -35,7 +36,7 @@ def _equalize_scale(X,Y,Z, ax):
 
 def plot_xyz(x, y, z, color, size, au=False):
     """
-    draw 3d cartesian plot of a body
+    Draw 3d cartesian plot of a body
 
     Arguments
     ---------
@@ -65,7 +66,7 @@ def plot_xyz(x, y, z, color, size, au=False):
 
 def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=None):
     """
-    plot positions of bodies based on altitude/azimuth coordinates
+    Plot positions of bodies based on altitude/azimuth coordinates
 
     Arguments
     ---------
@@ -117,7 +118,7 @@ def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=
 
 def plot_radec(ra, dec, mag=None, size=None):
     """
-    plot positions of bodies based on RA/Dec coordinates
+    Plot positions of bodies based on RA/Dec coordinates
 
     Arguments
     ---------
@@ -160,7 +161,7 @@ def plot_radec(ra, dec, mag=None, size=None):
 
 def star_chart(lon, lat, t=None, otype=None):
     """
-    plot the star chart for a location and time on earth
+    Plot the star chart for a location and time on earth
 
     Arguments
     ---------
@@ -180,3 +181,53 @@ def star_chart(lon, lat, t=None, otype=None):
     alt, az = radec_to_altaz(lon, lat, ra, dec, t)
     ax = plot_altaz(az, alt, mag=mag)
     return ax
+
+def get_image(position, size, survey='digitized sky survey'):
+    """
+    Plot image of a location in the sky by querying NASA's Virtual
+    Observatory (SkyView)
+
+    Arguments
+    ---------
+        position (tuple): position in sky; format: (ra, dec)
+        size (float):  size (FoV) of image in degrees
+        survey (str): name of survey; default 'digitized sky survey'.
+
+    Returns
+    -------
+        fig, ax
+    """
+    survey = survey.replace(' ', '+')
+    position = str(position).replace(' ', '')[1:-1]
+    BASE = 'https://skyview.gsfc.nasa.gov/cgi-bin/images?'
+    params = f'Survey={survey}&position={position}&Size={size}&Return=JPEG'
+    url = BASE + params
+    f = urlopen(url)
+    img = plt.imread(f, format='jpeg')
+    fig, ax = plt.subplots()
+    ax.imshow(img, cmap='gray')
+    return fig, ax
+
+def telescope(obs_loc, obj_loc, size, t=None, survey='digitized sky survey'):
+    """
+    Plot image of a location in the local sky of observer by querying
+    NASA's Virtual Observatory (SkyView)
+
+    Arguments
+    ---------
+        obs_loc (tuple): location of observer on Earth; format: (lon, lat)
+        obj_loc (tuple): position in sky; format: (az, alt)
+        size (float):  size (FoV) of image in degrees
+        t (datetime or str): time of observation; default now
+        survey (str): name of survey; default 'digitized sky survey'
+
+    Returns
+    -------
+        fig, ax
+    """
+    lon, lat = obs_loc
+    az , alt = obj_loc
+    ra, dec = altaz_to_radec(lon, lat, az, alt, t)
+    ra, dec = float(ra), float(dec)
+    fig, ax = get_image((ra,dec), size, survey)
+    return fig, ax
