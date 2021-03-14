@@ -121,7 +121,7 @@ plt.show()
 
 You can download data from astronomical catalogues:
 ```python
-cat = Catalogue('gaia2')
+cat = hp.Catalogue('gaia2')
 data, meta = cat.download()
 ```
 
