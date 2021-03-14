@@ -192,7 +192,7 @@ class Telescope:
         target_loc (tuple): location of a target point in the sky;
                             (ra, dec) or (az, alt)
         obs_loc (tuple): location of observer on Earth; format: (lon, lat)
-        fov (float) : Field of View in degrees
+        fov (float) : Field of View in degrees; default 1
         t (datetime or str): time of observation; default now
         survey (str): name of survey; default 'digitized sky survey'
 
@@ -209,7 +209,7 @@ class Telescope:
     def __init__(self,
                  target_loc,
                  obs_loc=None,
-                 fov=2,
+                 fov=1,
                  t=None,
                  survey='digitized sky survey'):
         
@@ -227,7 +227,6 @@ class Telescope:
         BASE = 'https://skyview.gsfc.nasa.gov/cgi-bin/images?'
         params = f'Survey={survey}&position={position}&Size={fov}&Return=JPEG'
         self.url = BASE + params
-        print(self.url)
         f = urlopen(self.url)
         
         self.data = plt.imread(f, format='jpeg')
