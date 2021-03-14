@@ -133,10 +133,10 @@ plt.show()
 
 or, use a virtual telescope:
 ```python
-paris = (2.2945, 48.8584)   # location of Paris
-obj_loc = (10.6847,41.2687) # az,alt of a point in the sky
+target = (10.6847,41.2687) # az,alt of a point in the sky
+paris = (2.2945, 48.8584)  # location of observer
 
 # get image with 3 degrees field of view
-fig, ax = hp.telescope(paris, obj_loc, size=3)
-plt.show()
+tel = hp.Telescope(target_loc=target, obs_loc=paris, fov=3)
+tel.show()
 ```

@@ -7,9 +7,9 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
+from urllib.request import urlopen
 from .simbad import bright_objects
 from .transform import radec_to_altaz, altaz_to_radec
-from urllib.request import urlopen
 
 def _equalize_scale(X,Y,Z, ax):
     """
@@ -182,52 +182,71 @@ def star_chart(lon, lat, t=None, otype=None):
     ax = plot_altaz(az, alt, mag=mag)
     return ax
 
-def get_image(position, size, survey='digitized sky survey'):
+class Telescope:
     """
     Plot image of a location in the sky by querying NASA's Virtual
     Observatory (SkyView)
 
     Arguments
     ---------
-        position (tuple): position in sky; format: (ra, dec)
-        size (float):  size (FoV) of image in degrees
-        survey (str): name of survey; default 'digitized sky survey'.
-
-    Returns
-    -------
-        fig, ax
-    """
-    survey = survey.replace(' ', '+')
-    position = str(position).replace(' ', '')[1:-1]
-    BASE = 'https://skyview.gsfc.nasa.gov/cgi-bin/images?'
-    params = f'Survey={survey}&position={position}&Size={size}&Return=JPEG'
-    url = BASE + params
-    f = urlopen(url)
-    img = plt.imread(f, format='jpeg')
-    fig, ax = plt.subplots()
-    ax.imshow(img, cmap='gray')
-    return fig, ax
-
-def telescope(obs_loc, obj_loc, size, t=None, survey='digitized sky survey'):
-    """
-    Plot image of a location in the local sky of observer by querying
-    NASA's Virtual Observatory (SkyView)
-
-    Arguments
-    ---------
+        target_loc (tuple): location of a target point in the sky;
+                            (ra, dec) or (az, alt)
         obs_loc (tuple): location of observer on Earth; format: (lon, lat)
-        obj_loc (tuple): position in sky; format: (az, alt)
-        size (float):  size (FoV) of image in degrees
+        fov (float) : Field of View in degrees
         t (datetime or str): time of observation; default now
         survey (str): name of survey; default 'digitized sky survey'
 
-    Returns
+    Attributes
+    ----------
+        data (numpy array): image data
+        url (str) : image url
+
+    Methods
     -------
-        fig, ax
+        plot : plots the image and returns fig and ax
+        show : shows the image
     """
-    lon, lat = obs_loc
-    az , alt = obj_loc
-    ra, dec = altaz_to_radec(lon, lat, az, alt, t)
-    ra, dec = float(ra), float(dec)
-    fig, ax = get_image((ra,dec), size, survey)
-    return fig, ax
+    def __init__(self,
+                 target_loc,
+                 obs_loc=None,
+                 fov=2,
+                 t=None,
+                 survey='digitized sky survey'):
+        
+        survey = survey.replace(' ', '+')
+
+        if obs_loc is not None:
+            lon, lat = obs_loc
+            az , alt = target_loc
+            ra, dec = altaz_to_radec(lon, lat, az, alt, t)
+            ra, dec = float(ra), float(dec)
+            position = str((ra, dec)).replace(' ', '')[1:-1]
+        else:
+            position = str(target_loc).replace(' ', '')[1:-1]
+
+        BASE = 'https://skyview.gsfc.nasa.gov/cgi-bin/images?'
+        params = f'Survey={survey}&position={position}&Size={fov}&Return=JPEG'
+        self.url = BASE + params
+        print(self.url)
+        f = urlopen(self.url)
+        
+        self.data = plt.imread(f, format='jpeg')
+
+    def plot(self):
+        """
+        Plots the image
+
+        Returns
+        -------
+            fig, ax
+        """
+        fig, ax = plt.subplots()
+        ax.imshow(self.data, cmap='gray')
+        ax.set_xticks([])
+        ax.set_yticks([])
+        return fig, ax
+
+    def show(self):
+        """Shows the image"""
+        fig, ax = self.plot()
+        plt.show()
