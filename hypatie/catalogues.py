@@ -29,6 +29,8 @@ sdss12_nm = 'SDSS Photometric Catalogue, (Release 12)'
 glimpse_nm = 'GLIMPSE Source Catalog (I + II + 3D) (IPAC 2008)' #GLIMPSE sources in Galactic Center (104240613 rows)
 gaia2_nm = 'Gaia data release 2'
 gaiae3_nm = 'Gaia early data release 3'
+dfgrs2_nm = '2dF Galaxy Redshift Survey'
+glade2_nm = 'GLADE v2.3 catalog (Galaxy List for the Advanced Detector Era)'
 
 # Table names
 lqac5_tb = 'J/A%2bA/624/A145/lqac5'
@@ -38,6 +40,8 @@ sdss12_tb = 'V/147/sdss12'
 glimpse_tb = 'II/293/glimpse'
 gaia2_tb = 'I/345/gaia2'
 gaiae3_tb = 'I/350/gaiaedr3'
+dfgrs2_tb = 'VII/250/2dfgrs'
+glade2_tb = 'VII/281/glade2'
 
 # Field names
 lqac5_fn = ['LQAC','RAJ2000','DEJ2000','Plx','pmRA*','pmDE','Ref','GAIA',
@@ -65,7 +69,11 @@ gaiae3_fn = ['EDR3Name','RAJ2000','DEJ2000','Epoch','Source','RandomI',
              'FGCorr','Gmag','e_Gmag','GmagCorr','FBP','e_FBP','BPmag',
              'e_BPmag','FRP','e_FRP','RPmag','e_RPmag','RVDR2','e_RVDR2',
              'Tefftemp','GLON','GLAT']
-
+dfgrs2_fn = ['SeqNum','Name','RAJ2000','DEJ2000','Bjmag','Bjsel','z','q_z',
+             'n_z','z.em','o_z.em','SNR']
+glade2_fn = ['PGC','GWGC','HyperLEDA','2MASS','SDSS-DR12','Flag1','RAJ2000',
+             'DEJ2000','Dist','e_Dist','z','Bmag','e_Bmag','BMAG','Jmag',
+             'e_Jmag','Hmag','e_Hmag','Kmag','e_Kmag','Flag2','Flag3']
 
 dc = {'lqac5'     : [lqac5_tb, lqac5_fn],
       'ucac4'     : [ucac4_tb, ucac4_fn],
@@ -73,10 +81,12 @@ dc = {'lqac5'     : [lqac5_tb, lqac5_fn],
       'sdss12'    : [sdss12_tb, sdss12_fn],
       'glimpse'   : [glimpse_tb, glimpse_fn],
       'gaia2'     : [gaia2_tb, gaia2_fn],
-      'gaiae3'    : [gaiae3_tb, gaiae3_fn]}
+      'gaiae3'    : [gaiae3_tb, gaiae3_fn],
+      'dfgrs2'    : [dfgrs2_tb, dfgrs2_fn],
+      'glade2'    : [glade2_tb, glade2_fn]}
 
 long_names = [lqac5_nm, ucac4_nm, hipparcos_nm, sdss12_nm,
-              glimpse_nm, gaia2_nm, gaiae3_nm]
+              glimpse_nm, gaia2_nm, gaiae3_nm, dfgrs2_nm, glade2_nm]
 
 # dictionary containing names of available catalogues
 available_catalogues = {k:v for (k,v) in [*zip(dc.keys(), long_names)]}
