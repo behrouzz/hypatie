@@ -155,7 +155,14 @@ class Catalogue:
         else:
             where = ''
 
-        order_by = '' if order_by is None else ' ORDER BY "' + order_by+'"'
+        if order_by is None:
+            order_by = ''
+        else:
+            if ' desc' in order_by.lower():
+                order_by = ' ORDER BY "'+order_by[:-5]+'"' + " DESC"
+            else:
+                order_by = ' ORDER BY "'+order_by+'"'
+        
         if self.random_sampling and isinstance(n_max, int):
             rnd = 'RAND(1) as rnd_sample,'
             order_by = ' ORDER BY rnd_sample'
