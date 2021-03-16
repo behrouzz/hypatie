@@ -109,3 +109,22 @@ def altaz_to_radec(lon, lat, az, alt, t=None):
 
     return ra, dec
 
+def radec_to_cartesian(ra, dec, r):
+    """
+    Convert ra/dec/distance coordinates to cartesian coordinates
+
+    Arguments
+    ---------
+        ra (iter of float): right ascension value(s) in degrees
+        dec (iter of float): declination value(s) in degrees
+        r (iter of float): distance value(s)
+
+    Returns
+    -------
+        x,y,z
+    """
+    d2r = np.pi/180
+    x = r * np.cos(dec*d2r) * np.cos(ra*d2r)
+    y = r * np.cos(dec*d2r) * np.sin(ra*d2r)
+    z = r * np.sin(dec*d2r)
+    return x,y,z
