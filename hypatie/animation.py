@@ -1,12 +1,40 @@
 """
 Module animation
 ================
-This module supplies one function, play() to play animation.
+This module supplies a main function, play() to play animation, as well as
+a class body to play user's defined bodies.
 """
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d import Axes3D, proj3d
+
+class Body:
+    """
+    User defined Body object to be entered in the play function.
+    
+    Parameters
+    ----------
+        name (str): name of the body
+        pos (np.array): coordinates array with three columns (x, y, z)
+                        shape of array is (n, 3); n: number of steps
+        time (list): list of datetime objects; each element is the time
+                     at which the coordinates is presented
+    
+    Attributes
+    ----------
+        x (np.array): x component of position vector
+        y (np.array): y component of position vector
+        z (np.array): z component of position vector
+    """
+    def __init__(self, name, pos, time):
+        self.name = name
+        self.name = name
+        self.pos = pos
+        self.time = time
+        self.x = pos[:,0]
+        self.y = pos[:,1]
+        self.z = pos[:,2]
 
 def play(bodies, names, colors, sizes, path=True, legend=True, interval=20):
     """
