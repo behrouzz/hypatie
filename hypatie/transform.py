@@ -35,6 +35,34 @@ def to_xy_plane(pos):
     new_pos = np.array([u[i] * mags[i] for i in range(len(mags))])
     return new_pos
 
+def rotating_coords(pos, period, times):
+    """
+    Transforms plane position coordinates (with z=0) to rotating frame
+    
+    Arguments
+    ---------
+        pos (np.array): 3d position array
+        perios (float): period in days
+        times (list): times list
+        
+    Returns
+    -------
+        rotating frame position array
+    """
+    # calculating theta
+    t = np.array(times) - times[0]
+    t = np.array([i.total_seconds() for i in t])
+    period = period * 86400
+    omega = 2*np.pi / period
+    theta = omega * t
+
+    # calculating rotating coordinates
+    x, y = pos[:, 0], pos[:, 1]
+    rot_x = x*np.cos(-theta) - y*np.sin(-theta)
+    rot_y = x*np.sin(-theta) + y*np.cos(-theta)
+    rot_pos = np.c_[rot_x, rot_y, np.zeros(len(theta))]
+    return rot_pos
+
 def radec_to_altaz(lon, lat, ra, dec, t=None):
     """
     Convert ra/dec coordinates to az/alt coordinates
