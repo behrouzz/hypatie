@@ -19,6 +19,22 @@ def _time(t):
     else:
         raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
 
+def mag(x):
+    """Returns magnitude of a vector"""
+    return np.linalg.norm(np.array(x))
+
+def unit(x):
+     """Returns unit vector of a vector"""
+    return x / mag(x)
+
+def to_xy_plane(pos):
+    """Returns new positions transformed in the xy plane"""
+    mags = np.array([mag(i) for i in pos])
+    pos_z0 = pos * np.array([1,1,0])
+    u = np.array([unit(i) for i in pos_z0])
+    new_pos = np.array([u[i] * mags[i] for i in range(len(mags))])
+    return new_pos
+
 def radec_to_altaz(lon, lat, ra, dec, t=None):
     """
     Convert ra/dec coordinates to az/alt coordinates
