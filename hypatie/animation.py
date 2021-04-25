@@ -124,7 +124,7 @@ def play2d(bodies, names, colors, sizes, path=True, legend=True,
 
     anim = FuncAnimation(fig, animate, init_func=init,
                          frames=len(dates), interval=interval,
-                         blit=True, repeat=True)
+                         blit=True, repeat=repeat)
     return anim
 
 def play(bodies, names, colors, sizes, path=True, legend=True, interval=20):
