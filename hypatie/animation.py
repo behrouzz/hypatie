@@ -36,6 +36,97 @@ class Body:
         self.y = pos[:,1]
         self.z = pos[:,2]
 
+def play2d(bodies, names, colors, sizes, path=True, legend=True,
+           interval=20, title=None, repeat=None):
+    """
+    Plays 2d animation from positions of several bodies.
+    
+    Arguments
+    ---------
+        bodies (list): targer bodies returned from Vector or Observer classes
+        names (list): name of bodies
+        colors (list): color of bodies
+        sizes (list): size of bodies
+        path (bool): whether or not draw the trajectory path of bodies;
+                     default True.
+        legend (bool): legend of the plot; default True.
+        interval (int): time interval between sequences, greater means slower.
+                        default 20.
+        title (str) : title of the ax
+        repeat (bool): whether or not repeat the animation
+        
+
+    Returns
+    -------
+        matplotlib.animation.FuncAnimation object
+    """
+    
+    for b in bodies:
+        if len(b.time)!=len(bodies[0].time):
+            raise Exception('Number of steps are not equal for all bodies!')
+
+    dates = bodies[0].time
+
+    minxs = min([vec.x.min() for vec in bodies])
+    minys = min([vec.y.min() for vec in bodies])
+    maxxs = max([vec.x.max() for vec in bodies])
+    maxys = max([vec.y.max() for vec in bodies])
+
+    fig, ax = plt.subplots(figsize=(8,8))
+    ax.set_aspect('equal')
+    title = 'hypatie python package' if title is None else title
+    ax.set_title(title)
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+
+
+    minxs = minxs*1.2 if minxs<0 else minxs*0.8
+    minys = minys*1.2 if minys<0 else minys*0.8
+    maxxs = maxxs*0.8 if maxxs<0 else maxxs*1.2
+    maxys = maxys*0.8 if maxys<0 else maxys*1.2
+    
+    ax.set_xlim([minxs, maxxs])
+    ax.set_ylim([minys, maxys])
+    
+
+
+    txt = ax.text(maxxs-maxxs*1.2, maxys-maxys*.08, '')
+
+    lines = []
+
+    alpha = 0.2 if path else 0
+
+    for i in range(len(bodies)):
+        ax.plot(bodies[i].x, bodies[i].y, colors[i], alpha=alpha)
+        lines.append(ax.plot(bodies[i].x, bodies[i].y,
+                             color=colors[i], marker='o', markersize=sizes[i],
+                             label=names[i])[0])
+
+    def init():
+        for line in lines:
+            line.set_xdata(np.array([]))
+            line.set_ydata(np.array([]))
+        return lines
+
+    def animate(i):
+        for j,line in enumerate(lines):
+            line.set_xdata(bodies[j].x[i])
+            line.set_ydata(bodies[j].y[i])
+        txt.set_text(dates[i].isoformat().replace('T', ' '))
+        return lines + [txt]
+
+    if legend:
+        plt.legend(loc='upper left')
+    plt.grid(True)
+
+    repeat = True if repeat is not None else repeat
+
+    anim = FuncAnimation(fig, animate, init_func=init,
+                         frames=len(dates), interval=interval,
+                         blit=True, repeat=True)
+    return anim
+
 def play(bodies, names, colors, sizes, path=True, legend=True, interval=20):
     """
     Plays animation from positions of several bodies.
