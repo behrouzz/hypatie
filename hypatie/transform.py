@@ -24,7 +24,7 @@ def mag(x):
     return np.linalg.norm(np.array(x))
 
 def unit(x):
-     """Returns unit vector of a vector"""
+    """Returns unit vector of a vector"""
     return x / mag(x)
 
 def to_xy_plane(pos):
