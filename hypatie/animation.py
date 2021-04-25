@@ -1,7 +1,7 @@
 """
 Module animation
 ================
-This module supplies a main function, play() to play animation, as well as
+This module supplies two functions, play() and play2d() to play animation, as well as
 a class body to play user's defined bodies.
 """
 import numpy as np
