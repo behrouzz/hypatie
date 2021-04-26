@@ -5,4 +5,4 @@ from .transform import radec_to_altaz, altaz_to_radec, radec_to_cartesian, to_xy
 from .simbad import bright_objects, get_objects, explore_region, search_region, search_sky, explore_sky
 from .catalogues import available_catalogues, Catalogue
 
-__version__ = "2.6.1"
+__version__ = "2.6.2"

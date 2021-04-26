@@ -113,14 +113,15 @@ def play2d(bodies, names, colors, sizes, path=True, legend=True,
         for j,line in enumerate(lines):
             line.set_xdata(bodies[j].x[i])
             line.set_ydata(bodies[j].y[i])
-        txt.set_text(dates[i].isoformat().replace('T', ' '))
+        text_date = dates[i].isoformat()[:10]
+        txt.set_text(text_date)
         return lines + [txt]
 
     if legend:
         plt.legend(loc='upper left')
     plt.grid(True)
 
-    repeat = True if repeat is not None else repeat
+    repeat = True if repeat is None else repeat
 
     anim = FuncAnimation(fig, animate, init_func=init,
                          frames=len(dates), interval=interval,
