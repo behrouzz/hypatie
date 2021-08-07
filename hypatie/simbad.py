@@ -22,6 +22,7 @@ For simplicity, we have also provided 7 string values ('radiation',
 'galaxy'). Theses are general categories which encompass many subcategories. 
 """
 import numpy as np
+import pandas as pd
 from urllib.request import urlopen
 import requests
 import json, csv, re
