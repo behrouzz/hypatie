@@ -23,6 +23,7 @@ For simplicity, we have also provided 7 string values ('radiation',
 """
 import numpy as np
 from urllib.request import urlopen
+import requests
 import json, csv, re
 from io import StringIO
 from datetime import datetime
@@ -242,3 +243,14 @@ def search_sky(lon, lat, t=None, az=0, alt=90, r=1, otype=None, n_max=1000):
     
     ra, dec = altaz_to_radec(lon, lat, az, alt, t)
     return search_region(ra=ra, dec=dec, r=r, otype=otype, n_max=n_max)
+
+def sql2df(script):
+    BASE = 'http://simbad.u-strasbg.fr/simbad/sim-tap/sync?request=doQuery&lang=adql&format=csv&query='
+    script = ' '.join(script.strip().split('\n'))
+    url = BASE+script.replace(' ', '%20') + '&format=csv'
+    req = requests.request('GET', url)
+    r = req.content.decode('utf-8')
+    lines = r.splitlines()
+    col = lines[0].split(',')
+    data_lines = [i.split(',') for i in lines[1:]]
+    return pd.DataFrame(data_lines, columns=col)
