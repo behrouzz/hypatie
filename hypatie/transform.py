@@ -199,7 +199,7 @@ def angular_sepration(r1, d1, r2, d2):
     
     kasr = radical / ( (np.sin(d1)*np.sin(d2)) + (np.cos(d1)*np.cos(d2)*np.cos(r2-r1)) )
 
-    sep = (180/pi) * np.arctan(kasr)
+    sep = (180/np.pi) * np.arctan(kasr)
     
     return sep
 
