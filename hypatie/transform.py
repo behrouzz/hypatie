@@ -172,3 +172,55 @@ def radec_to_cartesian(ra, dec, r):
     y = r * np.cos(dec*d2r) * np.sin(ra*d2r)
     z = r * np.sin(dec*d2r)
     return x,y,z
+
+def angular_sepration(r1, d1, r2, d2):
+    """
+    Calculate angular separation between two point
+
+    Arguments
+    ---------
+        r1 (float): right ascension of the first point in degrees
+        d1 (float): declination of the first point in degrees
+        r2 (float): right ascension of the second point in degrees
+        d2 (float): declination of the second point in degrees
+
+    Returns
+    -------
+        angular sepration in degrees
+    """
+    r1 = (np.pi/180) * r1
+    d1 = (np.pi/180) * d1
+    r2 = (np.pi/180) * r2
+    d2 = (np.pi/180) * d2
+
+    radical = np.sqrt(
+        (np.cos(d2)**2)*(np.sin(r2-r1)**2) + ((np.cos(d1)*np.sin(d2) - np.sin(d1)*np.cos(d2)*np.cos(r2-r1))**2)
+        )
+    
+    kasr = radical / ( (np.sin(d1)*np.sin(d2)) + (np.cos(d1)*np.cos(d2)*np.cos(r2-r1)) )
+
+    sep = (180/pi) * np.arctan(kasr)
+    
+    return sep
+
+def hmsdms_to_deg(hmsdms):
+    """
+    Convert HMS (hours, minutes, seconds) and DMS (degrees, minutes, seconds) to
+    RA, DEC in decimal degrees.
+    Example:
+        hmsdms_to_deg('06 45 08.91728 -16 42 58.0171')
+    Return:
+        (101.28715533333333, -15.28388413888889)
+    """
+    ls = hmsdms.split(' ')
+    ra_h = int(ls[0])
+    ra_m = int(ls[1])
+    ra_s = float(ls[2])
+    dec_d = int(ls[3])
+    dec_m = int(ls[4])
+    dec_s = float(ls[5])
+
+    ra = 15*ra_h + 15*ra_m/60 + 15*ra_s/3600
+    dec = dec_d + dec_m/60 + dec_s/3600
+
+    return ra, dec
