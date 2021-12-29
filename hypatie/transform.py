@@ -173,7 +173,7 @@ def radec_to_cartesian(ra, dec, r):
     z = r * np.sin(dec*d2r)
     return x,y,z
 
-def angular_sepration(r1, d1, r2, d2):
+def angular_separation(r1, d1, r2, d2):
     """
     Calculate angular separation between two point
 
