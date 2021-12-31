@@ -249,3 +249,28 @@ class Telescope:
         """Shows the image"""
         fig, ax = self.plot()
         plt.show()
+
+def plot_pm(ra, dec, pmra, pmdec, alpha=0.5, color=None):
+    """
+    Plot the proper motion of objects
+
+    Arguments
+    ---------
+        ra (iterable of floats): Array of RA
+        dec (iterable of floats): Array of DEC
+        pmra (iterable of floats): Array of pmRA
+        pmdec (iterable of floats): Array of pmDEC
+        color (iterable of trings): Array of colors
+
+    Returns
+    -------
+        fig, ax
+    """
+    origin = np.array([ra, dec])
+    fig, ax = plt.subplots()
+    ax.quiver(*origin, pmra, pmdec, alpha=alpha)
+    ax.scatter(ra, dec, color=color)
+    ax.set_aspect('equal')
+    ax.set_xlabel('RA')
+    ax.set_ylabel('DEC')
+    return fig, ax
