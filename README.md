@@ -140,3 +140,22 @@ paris = (2.2945, 48.8584)  # location of observer
 tel = hp.Telescope(target_loc=target, obs_loc=paris, fov=3)
 tel.show()
 ```
+
+## Explore proper motion
+
+Let's create a chart showing the proper motion of stars near the Sgr A* (Milky Way's central supermassive black hole).
+
+```python
+from hypatie.plots import explore_pm
+import matplotlib.pyplot as plt
+
+ra = 266.41681662499997
+dec = -29.00782497222222
+
+df, fig, ax = explore_pm(ra, dec, r=0.001, otype='star')
+plt.show()
+```
+
+![alt text](https://raw.githubusercontent.com/behrouzz/astronomy/main/images/sgr_A_pm.png)
+
+See more examples at [astrodatascience.net](https://astrodatascience.net/)
