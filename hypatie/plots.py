@@ -325,6 +325,7 @@ def explore_pm(ra, dec, r, otype=None, pm_valid=True, alpha=0.5, mag_max=None, n
     df = df.sort_values('ang_sep')
     if len(df)>0:
         fig, ax = plot_pm(df['ra'], df['dec'], df['pmra'], df['pmdec'], alpha=alpha, color=None)
+        ax.ticklabel_format(useOffset=False)
     else:
         fig, ax = None, None
     return df, fig, ax
