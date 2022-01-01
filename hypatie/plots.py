@@ -8,8 +8,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
 from urllib.request import urlopen
-from .simbad import bright_objects
-from .transform import radec_to_altaz, altaz_to_radec
+from .simbad import bright_objects, object_type, sql2df
+from .transform import radec_to_altaz, altaz_to_radec, angular_separation
 
 def _equalize_scale(X,Y,Z, ax):
     """
@@ -274,3 +274,52 @@ def plot_pm(ra, dec, pmra, pmdec, alpha=0.5, color=None):
     ax.set_xlabel('RA')
     ax.set_ylabel('DEC')
     return fig, ax
+
+def explore_pm(ra, dec, r, otype=None, pm_valid=True, alpha=0.5, mag_max=None, n_max=1000):
+    """
+    Explore a circular region with showing proper motions
+
+    Arguments
+    ---------
+        ra (float): RA of center of cirular region
+        dec (float): DEC of center of cirular region
+        r (float): radius of the cirular region in degrees
+        otype (str): type of object ('star','galaxy',etc.). Default None of all objects
+        pm_valid (bool): only return objects with valid pmRA and pmDEC
+        alpha (float): alpha (between 0 and 1) of the flesh marks
+        mag_max (float): maximum apparent value. Default None of all objects
+        n_max (int): maximum number of rows to return; default 1000
+
+    Returns
+    -------
+        df, fig, ax
+    """
+    if otype is not None:
+        otype = str(tuple(object_type(otype)))
+        add_otype = f" AND otype_txt in {otype}"
+    else:
+        add_otype = ""
+    if pm_valid:
+        add_pm = " AND pmra IS NOT NULL"
+    else:
+        add_pm = ""
+    if mag_max is not None:
+        add_mag = f" AND V <= {mag_max}"
+    else:
+        add_mag = ""
+    script = f"""SELECT TOP {n_max} main_id, otypedef.otype_longname, allfluxes.V, ra, dec, pmra, pmdec
+    FROM basic LEFT JOIN allfluxes ON basic.oid=allfluxes.oidref
+    LEFT JOIN otypedef ON basic.otype=otypedef.otype
+    WHERE CONTAINS(POINT('ICRS', ra, dec), CIRCLE('ICRS', {ra}, {dec}, {r})) = 1""" + add_otype + add_pm + add_mag
+    df = sql2df(script)
+    cols = ['V', 'ra', 'dec', 'pmra', 'pmdec']
+    for i in cols:
+        df.loc[df[i]=='', i] = np.nan
+    df[cols] = df[cols].astype(float)
+    df['ang_sep'] = [angular_separation(ra, dec, r, d) for r, d in zip(df['ra'], df['dec'])]
+    df = df.sort_values('ang_sep')
+    if len(df)>0:
+        fig, ax = plot_pm(df['ra'], df['dec'], df['pmra'], df['pmdec'], alpha=alpha, color=None)
+    else:
+        fig, ax = None, None
+    return df, fig, ax
