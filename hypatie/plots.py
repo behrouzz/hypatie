@@ -277,7 +277,7 @@ def plot_pm(ra, dec, pmra, pmdec, alpha=0.5, color=None):
 
 def explore_pm(ra, dec, r, otype=None, pm_valid=True, alpha=0.5, mag_max=None, n_max=1000):
     """
-    Explore a circular region with showing proper motions
+    Explore a circular region showing objects and their proper motion
 
     Arguments
     ---------
@@ -293,6 +293,11 @@ def explore_pm(ra, dec, r, otype=None, pm_valid=True, alpha=0.5, mag_max=None, n
     Returns
     -------
         df, fig, ax
+
+    Ex:
+    ---
+        ra, dec = 266.41681662499997, -29.00782497222222 # Sgr A*
+        df, fig, ax = explore_pm(ra, dec, r=0.001, otype='star')
     """
     if otype is not None:
         otype = str(tuple(object_type(otype)))
