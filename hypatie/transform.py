@@ -248,7 +248,7 @@ def posvel(ra, dec, pmra, pmdec, distance, radvel):
         
     Returns
     -------
-        position vectors, velocity vectors
+        position vectors (km), velocity vectors (km/s)
     """
     
     # Changes of RA and DEC in one second
