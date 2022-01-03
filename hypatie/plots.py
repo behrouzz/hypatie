@@ -273,6 +273,7 @@ def plot_pm(ra, dec, pmra, pmdec, alpha=0.5, color=None):
     ax.set_aspect('equal')
     ax.set_xlabel('RA')
     ax.set_ylabel('DEC')
+    ax.ticklabel_format(useOffset=False)
     return fig, ax
 
 def explore_pm(ra, dec, r, otype=None, pm_valid=True, alpha=0.5, mag_max=None, n_max=1000):
@@ -325,7 +326,7 @@ def explore_pm(ra, dec, r, otype=None, pm_valid=True, alpha=0.5, mag_max=None, n
     df = df.sort_values('ang_sep')
     if len(df)>0:
         fig, ax = plot_pm(df['ra'], df['dec'], df['pmra'], df['pmdec'], alpha=alpha, color=None)
-        ax.ticklabel_format(useOffset=False)
+        ax.scatter([ra], [dec], marker='+', c='r')
     else:
         fig, ax = None, None
     return df, fig, ax

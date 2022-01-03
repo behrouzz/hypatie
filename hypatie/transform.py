@@ -224,3 +224,52 @@ def hmsdms_to_deg(hmsdms):
     dec = dec_d + dec_m/60 + dec_s/3600
 
     return ra, dec
+
+def posvel(ra, dec, pmra, pmdec, distance, radvel):
+    """
+    Cartesian position and velocity vectors.
+    
+    Note:
+    -----
+    1) If you have parallax instead of distance, use this formulla:
+    distance = (1/(plx/1000)) * 30856775814913.67
+    
+    2) If you have redshift instead of radial velocity, use this formulla:
+    radvel = z * 299792.458
+    
+    Arguments
+    ---------
+        ra (iter of float): RA of objects
+        dec (iter of float): DEC of objects
+        pmra (iter of float): pmRA of objects
+        pmdec (iter of float): pmDEC of objects
+        distance (iter of float): Distance to objects in km
+        radvel (iter of float): Radial Velocity of objects in km/s
+        
+    Returns
+    -------
+        position vectors, velocity vectors
+    """
+    
+    # Changes of RA and DEC in one second
+    d_ra = ((pmra/1000)/3600)/31557600
+    d_dec = ((pmdec/1000)/3600)/31557600
+    
+    r1, d1 = ra, dec
+    r2 = r1 + d_ra
+    d2 = d1 + d_dec
+    
+    # Changes in distance
+    dist1 = distance
+    dist2 = dist1 + radvel
+    
+    # Convert to cartesian
+    x1, y1, z1 = radec_to_cartesian(r1, d1, dist1)
+    x2, y2, z2 = radec_to_cartesian(r2, d2, dist2)
+    pos1 = np.array([x1,y1,z1])
+    pos2 = np.array([x2,y2,z2])
+    
+    # Velocity
+    d_pos = pos2 - pos1
+    vel = d_pos * 1 # because it's in one second
+    return pos1, vel

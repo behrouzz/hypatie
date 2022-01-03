@@ -143,7 +143,7 @@ tel.show()
 
 ## Explore proper motion
 
-Let's create a chart showing the proper motion of stars near the Sgr A* (Milky Way's central supermassive black hole).
+Let's create a chart showing the proper motion of stars near the Sgr A* (Milky Way's central supermassive black hole). The coordinates of the black hole are given and shown with the red '+' in the chart.
 
 ```python
 from hypatie.plots import explore_pm
