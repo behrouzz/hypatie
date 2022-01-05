@@ -232,10 +232,10 @@ def posvel(ra, dec, pmra, pmdec, distance, radvel):
     Note:
     -----
     1) If you have parallax instead of distance, use this formulla:
-    distance = (1/(plx/1000)) * 30856775814913.67
+    distance = (1/(plx/1000)) * 30856775814913.67 # km
     
     2) If you have redshift instead of radial velocity, use this formulla:
-    radvel = z * 299792.458
+    radvel = z * 299792.458 # km/s
     
     Arguments
     ---------
