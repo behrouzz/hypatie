@@ -10,8 +10,8 @@ from collections.abc import Iterable
 from urllib.request import urlopen
 from .simbad import bright_objects, object_type, sql2df
 from .transform import radec_to_altaz, altaz_to_radec, angular_separation
-from datetime import datetime
 from .data import cities
+from .horizons import Observer
 
 def _equalize_scale(X,Y,Z, ax):
     """
@@ -352,14 +352,13 @@ def plot_jupiter_moons(loc, t):
     else:
         loc = loc.replace(' ','')  + '@399'
 
-    if type(t)==str:
-        t = datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+    jup = Observer(599, t, center=loc)
+    io  = Observer(501, t, center=loc)
+    eu  = Observer(502, t, center=loc)
+    ga  = Observer(503, t, center=loc)
+    ca  = Observer(504, t, center=loc)
 
-    jup = hp.Observer(599, t, center=loc)
-    io = hp.Observer(501, t, center=loc)
-    eu = hp.Observer(502, t, center=loc)
-    ga = hp.Observer(503, t, center=loc)
-    ca = hp.Observer(504, t, center=loc)
+    t = jup.time
 
     fig, ax = plt.subplots()
 
