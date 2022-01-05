@@ -14,6 +14,8 @@ from datetime import datetime, timedelta
 from urllib.request import urlopen
 import numpy as np
 from .plots import plot_altaz, plot_xyz
+from .data import cities
+import matplotlib.pyplot as plt
 
 BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
 
@@ -361,3 +363,48 @@ class Observer:
             matplotlib.axes.Axes object
         """
         plot_altaz(self.ra, self.dec, color, size)
+
+
+def jupiter_moons(loc, t):
+    """
+    Draw Jupiter and it's Galilean moons
+    
+    Arguments
+    ---------
+        loc (str): location of observer: "lon,lat,elevation"
+        t (datetime or str): time of observation (UTC)
+
+    Returns
+    -------
+        fig, ax
+    """
+    
+    if (type(loc)==str) and loc in cities.keys():
+        loc = str(cities[loc]).replace(' ','')[1:-1] + '@399'
+    else:
+        loc = loc.replace(' ','')  + '@399'
+
+    jup = Observer(599, t, center=loc)
+    io  = Observer(501, t, center=loc)
+    eu  = Observer(502, t, center=loc)
+    ga  = Observer(503, t, center=loc)
+    ca  = Observer(504, t, center=loc)
+
+    t = jup.time
+
+    fig, ax = plt.subplots()
+
+    ax.scatter(jup.pos[0], jup.pos[1], label='JUP', c='orange', s=200, alpha=0.5)
+    ax.scatter(io.pos[0], io.pos[1], label='IO', c='k', s=20)
+    ax.scatter(eu.pos[0], eu.pos[1], label='EU', c='b', s=20)
+    ax.scatter(ga.pos[0], ga.pos[1], label='GA', c='r', s=20)
+    ax.scatter(ca.pos[0], ca.pos[1], label='CA', c='g', s=20)
+
+    text = "Jupiter's Galilean moons | " + t.isoformat().replace('T', ' ')[:16]
+    ax.set_title(text)
+    ax.ticklabel_format(useOffset=False)
+    ax.set_xlabel('Az')
+    ax.set_ylabel('Alt')
+    plt.legend()
+    plt.grid()
+    return fig, ax
