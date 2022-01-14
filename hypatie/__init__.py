@@ -6,4 +6,4 @@ from .simbad import bright_objects, get_objects, explore_region, search_region, 
 from .catalogues import available_catalogues, Catalogue
 from .cosmology import CosModel, Planck18
 
-__version__ = "2.9.10"
+__version__ = "2.9.11"

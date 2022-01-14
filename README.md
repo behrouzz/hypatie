@@ -127,7 +127,7 @@ data, meta = cat.download()
 
 or, plot the star chart for your location:
 ```python
-ax = hp.star_chart(lon=2.2945, lat=48.8584)
+fig, ax = hp.star_chart(lon=2.2945, lat=48.8584)
 plt.show()
 ```
 

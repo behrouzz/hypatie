@@ -115,7 +115,7 @@ def plot_altaz(az, alt, mag=None, size=None, color='k', alpha=1, marker='o', ax=
         alt = [90-i for i in alt]
     ax.scatter(az, alt, c=color, s=size, alpha=alpha, marker=marker)
     ax.grid(True, alpha=0.7)
-    return ax
+    return fig, ax
 
 def plot_radec(ra, dec, mag=None, size=None):
     """
@@ -180,8 +180,8 @@ def star_chart(lon, lat, t=None, otype=None):
     ra  = [i[3] for i in rows]
     dec = [i[4] for i in rows]
     alt, az = radec_to_altaz(lon, lat, ra, dec, t)
-    ax = plot_altaz(az, alt, mag=mag)
-    return ax
+    fig, ax = plot_altaz(az, alt, mag=mag)
+    return fig, ax
 
 class Telescope:
     """
