@@ -5,7 +5,7 @@ This module supplies two functions (radec_to_altaz and altaz_to_radec)
 to transform between coordinates systems.
 """
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
 
@@ -18,6 +18,15 @@ def _time(t):
         return datetime.utcnow()
     else:
         raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
+
+def dt2jd(dt):
+    return dt.toordinal() + 1721424.5
+
+def jd2dt(jd):
+    jd0 = 2268923.5
+    t0 = datetime(1500,1,1)
+    dt =  timedelta(days=jd-jd0)
+    return t0+dt        
 
 def mag(x):
     """Returns magnitude of a vector"""
