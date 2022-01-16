@@ -182,6 +182,32 @@ def radec_to_cartesian(ra, dec, r):
     z = r * np.sin(dec*d2r)
     return x,y,z
 
+def cartesian_to_radec(x, y, z):
+    """
+    Convert cartesian coordinates to ra/dec/distance coordinates
+
+    Arguments
+    ---------
+        x (float): x
+        y (float): y
+        z (float): z
+
+    Returns
+    -------
+        ra, dec, r
+    """
+    r2d = 180/np.pi
+
+    r = np.sqrt(x**2 + y**2 + z**2)
+    dec = np.arcsin(z/r)
+    if x > 0:
+        ra = np.arctan(y/x)
+    elif x < 0:
+        ra = np.arctan(y/x) + np.pi
+    else:
+        ra = np.pi/2
+    return ra*r2d, dec*r2d, r
+
 def angular_separation(r1, d1, r2, d2):
     """
     Calculate angular separation between two point
