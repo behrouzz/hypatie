@@ -1,13 +1,39 @@
 """
 Module transform
 =============
-This module supplies two functions (radec_to_altaz and altaz_to_radec)
-to transform between coordinates systems.
+This module supplies two classes (RA, DEC) and several functions
 """
 import numpy as np
 from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
+
+
+class RA:
+    def __init__(self, h=0, m=0, s=0):
+        self.h = h
+        self.m = m
+        self.s = s
+        self.hours = h + m/60 + s/3600
+        self.minutes = h*60 + m + s/60
+        self.seconds = h*3600 + m*60 + s
+        self.deg = 15 * self.hours
+        self.rad = self.deg * (3.141592653589793/180)
+        
+
+class DEC:
+    def __init__(self, sign='+', d=0, m=0, s=0):
+        self.sign = sign
+        sgn = -1 if sign=='-' else 1
+        self.d = d
+        self.m = m
+        self.s = s
+        self.degrees = (d + m/60 + s/3600) * sgn
+        self.minutes = (d*60 + m + s/60) * sgn
+        self.seconds = (d*3600 + m*60 + s) * sgn
+        self.deg = self.degrees
+        self.rad = self.deg * (3.141592653589793/180)
+
 
 def _time(t):
     if isinstance(t, datetime):
@@ -238,27 +264,6 @@ def angular_separation(r1, d1, r2, d2):
     
     return sep
 
-def hmsdms_to_deg(hmsdms):
-    """
-    Convert HMS (hours, minutes, seconds) and DMS (degrees, minutes, seconds) to
-    RA, DEC in decimal degrees.
-    Example:
-        hmsdms_to_deg('06 45 08.91728 -16 42 58.0171')
-    Return:
-        (101.28715533333333, -15.28388413888889)
-    """
-    ls = hmsdms.split(' ')
-    ra_h = int(ls[0])
-    ra_m = int(ls[1])
-    ra_s = float(ls[2])
-    dec_d = int(ls[3])
-    dec_m = int(ls[4])
-    dec_s = float(ls[5])
-
-    ra = 15*ra_h + 15*ra_m/60 + 15*ra_s/3600
-    dec = dec_d + dec_m/60 + dec_s/3600
-
-    return ra, dec
 
 def posvel(ra, dec, pmra, pmdec, distance, radvel):
     """
