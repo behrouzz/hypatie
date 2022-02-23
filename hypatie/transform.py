@@ -62,7 +62,7 @@ def to_epoch(ra, dec, epoch):
     """
     Convert coordinates to another epoch
 
-    Note: you have to multiply d_ra and d_dec by (2000-epoch) and
+    Note: you have to multiply d_ra and d_dec by (epoch-2000) and
     add the results to the initial ra and dec to get the new ra and
     dec in the desired epoch.
 
