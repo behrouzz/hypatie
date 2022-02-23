@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
 
+d2r = np.pi/180
+r2d = 180/np.pi
 
 class RAhms:
     def __init__(self, h=0, m=0, s=0):
@@ -55,6 +57,50 @@ class DECdeg:
         self.str = self.sign + str(self.d)+'d' + \
                    str(self.m)+'m' + str(self.s)+'s'
         
+
+def to_epoch(ra, dec, epoch):
+    """
+    Convert coordinates to another epoch
+
+    Note: you have to multiply d_ra and d_dec by (2000-epoch) and
+    add the results to the initial ra and dec to get the new ra and
+    dec in the desired epoch.
+
+    Example:
+    >>> ra2000, dec2000 = 11.795879583333333, -26.3824475
+    >>> epoch = 1950
+    >>> d_ra, d_dec = to_epoch(ra2000, dec2000, epoch=epoch)
+    >>> ra = ra2000 + (epoch-2000)*d_ra
+    >>> dec = dec2000 + (epoch-2000)*d_dec
+    >>> print(ra,dec)
+    11.183690048723463 -26.65500294330134
+    
+    Arguments
+    ---------
+        ra  (deg)    : ra in J2000
+        dec (deg)    : dec in J2000
+        epoch (year) : epoch to convert to
+        
+    Returns
+    -------
+        d_ra  : delta RA per year (deg/yr)
+        d_dec : delta DEC per year (deg/yr)
+    """
+    T = (epoch - 2000) / 100
+    m = 3.07496 + 0.00186*T
+    n = 1.33621 - 0.00057*T
+    nn = 20.0431 - 0.0085*T
+
+    d_ra = m + n*np.sin(ra*d2r)*np.tan(dec*d2r)
+    d_dec = nn*np.cos(ra*d2r)
+
+    d_ra = RAhms(s=d_ra).deg
+    if d_dec<0:
+        d_dec = DECdms(sign='-', s=d_dec).deg
+    else:
+        d_dec = DECdms(s=d_dec).deg
+    return d_ra, d_dec
+
 
 def _time(t):
     if isinstance(t, datetime):
