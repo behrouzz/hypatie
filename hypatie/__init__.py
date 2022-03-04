@@ -1,4 +1,4 @@
-from .horizons import Vector, Observer
+from .horizons import Vector, Observer, download
 from .animation import Body, play, play2d
 from .plots import star_chart, plot_xyz, plot_altaz, plot_radec, Telescope
 from .transform import radec_to_altaz, altaz_to_radec, radec_to_cartesian, to_xy_plane, rotating_coords
