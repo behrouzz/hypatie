@@ -9,6 +9,7 @@ The Vector class provides positions with three dimensions: x,y,z.
 The Observer class provides positions with two dimensions: ra,dec or
 alt,az; depending on the request.
 """
+
 import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
@@ -17,7 +18,9 @@ from .plots import plot_altaz, plot_xyz
 from .data import cities
 import matplotlib.pyplot as plt
 
+
 BASE_URL = 'https://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&'
+
 
 def _time_format(t): #check time format
     correct = True
@@ -28,7 +31,50 @@ def _time_format(t): #check time format
     else:
         correct = False
     return [correct, t]
-    
+
+
+def download(script):
+    params = script.replace('\n', '&').replace(' ', '').replace('+', '%2B')
+    url = BASE_URL + params
+    print(url)
+    error_msg = ''
+    with urlopen(url) as r:
+        all_text = r.read().decode('utf-8')
+    if ('$$SOE' not in all_text) or ('$$EOE' not in all_text):
+        error_msg = all_text[:all_text.find('$$SOF')]
+        #return error_msg
+        print(error_msg)
+    mark1 = all_text.find('$$SOE')
+    text = all_text[mark1+6:]
+    mark2 = text.find('$$EOE')
+    text = text[:mark2]
+    raw_rows = text.split('\n')[:-1]
+    n_columns = len(raw_rows[0].split(',')[:-1])
+
+    head = all_text[:mark1]
+    cols = re.findall(r'[a-zA-Z()_\s]+,', head)
+    cols = "".join(cols)
+    cols = cols.split('\n')[-1].split(',')
+    cols = [i.strip() for i in cols][:-1]
+
+    raw_rows = [i.split(',')[:-1] for i in raw_rows]
+    rows = []
+    for r in raw_rows:
+        row = [i.strip() for i in r]
+        rows.append(row)
+    df = pd.DataFrame(data=rows, columns=cols)
+    return modify_jpl_df(df)
+
+
+def modify_jpl_df(df):
+    df['Calendar Date (TDB)'] = \
+                 df['Calendar Date (TDB)'].str[5:]\
+                 .apply(lambda i: datetime.strptime(i, '%Y-%b-%d %H:%M:%S.%f'))
+    df = df.set_index('Calendar Date (TDB)')
+    df.index.name = 'TBD'
+    df = df.astype(float)
+    return df
+
 
 class Vector:
     """
