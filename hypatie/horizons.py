@@ -13,7 +13,9 @@ alt,az; depending on the request.
 import re
 from datetime import datetime, timedelta
 from urllib.request import urlopen
+from requests import request
 import numpy as np
+import pandas as pd
 from .plots import plot_altaz, plot_xyz
 from .data import cities
 import matplotlib.pyplot as plt
@@ -34,12 +36,10 @@ def _time_format(t): #check time format
 
 
 def download(script):
-    params = script.replace('\n', '&').replace(' ', '').replace('+', '%2B')
-    url = BASE_URL + params
-    print(url)
+    url = BASE_URL + script
     error_msg = ''
-    with urlopen(url) as r:
-        all_text = r.read().decode('utf-8')
+    req = request('GET', url)
+    all_text = req.content.decode('utf-8')
     if ('$$SOE' not in all_text) or ('$$EOE' not in all_text):
         error_msg = all_text[:all_text.find('$$SOF')]
         #return error_msg
