@@ -7,4 +7,4 @@ from .catalogues import available_catalogues, Catalogue
 from .cosmology import CosModel, Planck18
 from .time import datetime_to_jd, jd_to_datetime
 
-__version__ = "2.10.1"
+__version__ = "2.10.2"
