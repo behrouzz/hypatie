@@ -5,6 +5,6 @@ from .transform import radec_to_altaz, altaz_to_radec, radec_to_cartesian, to_xy
 from .simbad import bright_objects, get_objects, explore_region, search_region, search_sky, explore_sky
 from .catalogues import available_catalogues, Catalogue
 from .cosmology import CosModel, Planck18
-from .time import datetime_to_jd, jd_to_datetime(jd)
+from .time import datetime_to_jd, jd_to_datetime
 
 __version__ = "2.10.0"
