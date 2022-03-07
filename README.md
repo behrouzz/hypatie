@@ -121,23 +121,29 @@ plt.show()
 
 You can download data from astronomical catalogues:
 ```python
-cat = hp.Catalogue('gaia2')
+from hypatie.catalogues import Catalogue
+
+cat = Catalogue('gaia2')
 data, meta = cat.download()
 ```
 
 or, plot the star chart for your location:
 ```python
-fig, ax = hp.star_chart(lon=2.2945, lat=48.8584)
+from hypatie.plots import star_chart
+
+fig, ax = star_chart(lon=2.2945, lat=48.8584)
 plt.show()
 ```
 
 or, use a virtual telescope:
 ```python
+from hypatie.plots import Telescope
+
 target = (10.6847,41.2687) # az,alt of a point in the sky
 paris = (2.2945, 48.8584)  # location of observer
 
 # get image with 3 degrees field of view
-tel = hp.Telescope(target_loc=target, obs_loc=paris, fov=3)
+tel = Telescope(target_loc=target, obs_loc=paris, fov=3)
 tel.show()
 ```
 
