@@ -1,7 +1,7 @@
 """
 Module transform
 =============
-This module supplies two classes (RA, DEC) and several functions
+This module supplies classes and functions for dealing with coordinates
 """
 import numpy as np
 from datetime import datetime, timedelta
@@ -423,12 +423,3 @@ def posvel(ra, dec, pmra, pmdec, distance, radvel):
     d_pos = pos2 - pos1
     vel = d_pos * 1 # because it's in one second
     return pos1, vel
-
-
-pos = np.array([[-11436128.8965462 ,  97909479.5470168 ,  44718123.44935494],
-                [-14454793.11966905,  97524889.14856116,  44736079.51751721],
-                [-17462984.82979699,  97063115.69964717,  44718643.92390588],
-                [-20458308.58654847,  96524501.04743192,  44665818.91210175],
-                [-23438377.86907287,  95909449.432637  ,  44577635.36487363]])
-
-a = pos[0]
