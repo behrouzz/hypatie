@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import math
 
 
@@ -92,3 +92,23 @@ def jd_to_datetime(jd):
         
     return dt
   
+
+def utc2tdb(UTC, LP=37):
+    """
+    Convert UTC to TDB
+    Ref: https://gssc.esa.int/navipedia/index.php/Transformations_between_Time_Systems
+    """
+    # UTC to TAI
+    TAI = UTC + timedelta(seconds=LP)
+
+    # TAI to TDT (TDT==TT)
+    TDT = TAI + timedelta(seconds=32.184)
+
+    # calculating TDB
+    # ---------------
+    # T: centuries from J2000 of TDT
+    T = (datetime_to_jd(TDT) - 2451545) / 36525
+    g = (2*math.pi/360) * (357.528 + 35999.050*T)
+    dt = 0.001658 * math.sin(g + 0.0167*math.sin(g))
+    TDB = TDT + timedelta(seconds=dt)
+    return TDB
