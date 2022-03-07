@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 import math
 
+d2r = math.pi/180
+LP = 37
+
 
 def sec_to_jd(seconds):
     """seconds since J2000 to jd"""
@@ -93,22 +96,35 @@ def jd_to_datetime(jd):
     return dt
   
 
-def utc2tdb(UTC, LP=37):
-    """
-    Convert UTC to TDB
-    Ref: https://gssc.esa.int/navipedia/index.php/Transformations_between_Time_Systems
-    """
-    # UTC to TAI
-    TAI = UTC + timedelta(seconds=LP)
+def utc2tt(t, lp=LP):
+    TAI = t + timedelta(seconds=lp)
+    TT = TAI + timedelta(seconds=32.184)
+    return TT
 
-    # TAI to TDT (TDT==TT)
-    TDT = TAI + timedelta(seconds=32.184)
+def tt2utc(t, lp=LP):
+    TAI = t - timedelta(seconds=32.184)
+    utc = TAI - timedelta(seconds=lp)
+    return utc
 
-    # calculating TDB
-    # ---------------
-    # T: centuries from J2000 of TDT
-    T = (datetime_to_jd(TDT) - 2451545) / 36525
+def tt2tdb(t, lp=LP):
+    T = (datetime_to_jd(t) - 2451545) / 36525 # centuries from J2000
     g = (2*math.pi/360) * (357.528 + 35999.050*T)
     dt = 0.001658 * math.sin(g + 0.0167*math.sin(g))
-    TDB = TDT + timedelta(seconds=dt)
+    TDB = t + timedelta(seconds=dt)
     return TDB
+
+def tdb2tt(tdb):
+    g = 357.53 + 0.9856003*(datetime_to_jd(tdb)-2451545)
+    dt = (0.001658*math.sin(g*d2r) + 0.000014*math.sin(2*g*d2r))
+    tt = tdb - timedelta(seconds=dt)
+    return tt
+
+def utc2tdb(utc, lp=LP):
+    tt = utc2tt(utc, lp)
+    tdb = tt2tdb(tt, lp)
+    return tdb
+
+def tdb2utc(tdb, lp=LP):
+    tt = tdb2tt(tdb)
+    utc = tt2utc(tt, lp=lp)
+    return utc
