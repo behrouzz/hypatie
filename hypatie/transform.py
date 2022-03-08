@@ -7,6 +7,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
+from .time import datetime_to_jd
 
 d2r = np.pi/180
 r2d = 180/np.pi
@@ -112,6 +113,15 @@ def to_epoch(ra, dec, epoch):
     else:
         d_dec = DECdms(s=d_dec).deg
     return d_ra, d_dec
+
+def obliq(t):
+    obl_cf = [23.439279444444445, -0.013010213611111111,
+              -5.0861111111111115e-08, 5.565e-07,
+              -1.6e-10, -1.2055555555555555e-11]
+    T = (datetime_to_jd(t) - 2451545) / 36525 # centuries from J2000
+    cf = np.array(obl_cf[::-1])
+    f = np.poly1d(cf)
+    return f(T)
 
 
 def _time(t):
