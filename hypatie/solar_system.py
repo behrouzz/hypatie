@@ -21,7 +21,9 @@ def get_sun(t):
 
     Approximation based on method presented by The Astronomical Almanac,
     to calculate the apparent coordinates of the Sun, mean equinox and
-    ecliptic of date.
+    ecliptic of date, to a precision of about 0°.01 (36″), for dates 
+    between 1950 and 2050.
+    Ref: https://en.wikipedia.org/wiki/Position_of_the_Sun
 
     Parameters
     ----------
