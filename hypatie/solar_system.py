@@ -1,5 +1,5 @@
 import numpy as np
-from hypatie.time import utc2tt, datetime_to_jd
+from .time import utc2tt, datetime_to_jd
 from datetime import datetime
 
 d2r = np.pi/180
