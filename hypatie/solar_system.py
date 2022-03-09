@@ -49,4 +49,13 @@ def get_sun(t):
     ra = rev(np.arctan2(np.cos(obl*d2r)*np.sin(ecl_lon*d2r), np.cos(ecl_lon*d2r))*r2d)
     dec = np.arcsin(np.sin(obl*d2r)*np.sin(ecl_lon*d2r))*r2d
     return ra, dec, r
-    
+
+
+def dec_sun(t):
+    t = utc2tt(t)
+    t0 = datetime(t.year, 1, 1)
+    dt = t - t0
+    N = dt.days + dt.seconds/86400 + dt.microseconds/(1_000_000*86400)
+    in_cos = 0.98565*d2r*(N+10) + 1.914*d2r * np.sin(0.98565*d2r*(N-2))
+    dec = -np.arcsin(0.39779 * np.cos(in_cos)) * r2d
+    return dec
