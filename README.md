@@ -117,6 +117,24 @@ anim = hp.play(bodies, names, colors, sizes)
 plt.show()
 ```
 
+## Transformations
+
+There are several functions in *hypatie.transform* module. As an example, let's use the *to_tete* function which transforms the J2000 coordinates to True Equator True Equinox (of date):
+
+```python
+from hypatie.transform import to_tete
+import numpy as np
+from datetime import datetime
+
+t = datetime.utcnow()
+pos = np.array([0.73859258, 0.13935437, 0.65959182])
+
+pos_tete = to_tete(pos, t)
+
+print(pos_tete)
+# [0.73655376 0.14284748 0.66112265]
+```
+
 ## Deep sky
 
 You can download data from astronomical catalogues:
