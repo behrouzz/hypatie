@@ -7,7 +7,7 @@ Ref: https://gssc.esa.int/navipedia/index.php/ICRF_to_CEP
 """
 
 from numpy import sin, cos, array, pi, matmul
-from hypatie import utc2tdb, datetime_to_jd
+from .time import utc2tdb, datetime_to_jd
 from datetime import datetime
 import pandas as pd
 from io import StringIO
