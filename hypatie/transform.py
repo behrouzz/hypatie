@@ -114,6 +114,24 @@ def to_epoch(ra, dec, epoch):
         d_dec = DECdms(s=d_dec).deg
     return d_ra, d_dec
 
+
+def to_tete(pos, t):
+    """
+    Convert ICRS J2000 coordinates to True Equator True Equinox (of date)
+    
+    Arguments
+    ---------
+        pos  (np.array) : [x, y, z] coordinates in ICRS J2000
+        t (datetime)    : Observation time (UTC)
+        
+    Returns
+    -------
+        position at True Equator True Equinox
+    """
+    from .iau_1976_1980 import icrf2cep
+    return icrf2cep(pos, t)
+
+
 def obliq(t):
     obl_cf = [23.439279444444445, -0.013010213611111111,
               -5.0861111111111115e-08, 5.565e-07,
