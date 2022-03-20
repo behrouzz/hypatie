@@ -119,20 +119,23 @@ plt.show()
 
 ## Transformations
 
-There are several functions in *hypatie.transform* module. As an example, let's use the *to_tete* function which transforms the J2000 coordinates to True Equator True Equinox (of date):
+There are several functions in *hypatie.transform* module. As an example, let's use the *to_tete* function which transforms the GCRS coordinates to True Equator True Equinox (of date):
 
 ```python
 from hypatie.transform import to_tete
 import numpy as np
 from datetime import datetime
 
-t = datetime.utcnow()
+t = datetime(2022, 3, 18)
+
+# GCRS coordinates
 pos = np.array([0.73859258, 0.13935437, 0.65959182])
 
+# True Equator and True equinox of t
 pos_tete = to_tete(pos, t)
 
 print(pos_tete)
-# [0.73655376 0.14284748 0.66112265]
+#[0.73649269 0.14295327 0.66116782]
 ```
 
 ## Deep sky

@@ -1,6 +1,6 @@
 """
 Module transform
-=============
+================
 This module supplies classes and functions for dealing with coordinates
 """
 import numpy as np
@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
 from .time import datetime_to_jd
+from .iau2000A import gcrs2tete
 
 d2r = np.pi/180
 r2d = 180/np.pi
@@ -117,19 +118,18 @@ def to_epoch(ra, dec, epoch):
 
 def to_tete(pos, t):
     """
-    Convert ICRS J2000 coordinates to True Equator True Equinox (of date)
+    Convert GCRS J2000 coordinates to True Equator True Equinox (of date)
     
     Arguments
     ---------
-        pos  (np.array) : [x, y, z] coordinates in ICRS J2000
+        pos  (np.array) : [x, y, z] coordinates in GCRS J2000
         t (datetime)    : Observation time (UTC)
         
     Returns
     -------
         position at True Equator True Equinox
     """
-    from .iau_1976_1980 import icrf2cep
-    return icrf2cep(pos, t)
+    return gcrs2tete(pos, t)
 
 
 def obliq(t):
