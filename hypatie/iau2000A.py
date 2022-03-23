@@ -131,11 +131,15 @@ B = np.array([[ 1-0.5*(da0**2 + e0**2), da0, -e0],
               [-da0-n0*e0, 1-0.5*(da0**2 + n0**2), -n0],
               [e0-n0*da0, n0+e0*da0, 1-0.5*(n0**2+e0**2)]])
 
-
-def gcrs2tete(pos, t):
+def tete_rotmat(t):
     t = utc2tdb(t)
     T = (datetime_to_jd(t) - 2451545) / 36525
     P = precession(T)
     N = nutation(T)
-    return np.matmul(np.matmul(np.matmul(N, P), B), pos)
+    rot_mat = np.matmul(np.matmul(N, P), B)
+    return rot_mat
+
+def gcrs2tete(pos, t):
+    rot_mat = tete_rotmat(t)
+    return np.matmul(rot_mat, pos)
 

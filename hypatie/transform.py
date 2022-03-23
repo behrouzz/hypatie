@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
 from .time import datetime_to_jd
-from .iau2000A import gcrs2tete
+from .iau2000A import gcrs2tete, tete_rotmat
 
 d2r = np.pi/180
 r2d = 180/np.pi
@@ -114,6 +114,28 @@ def to_epoch(ra, dec, epoch):
     else:
         d_dec = DECdms(s=d_dec).deg
     return d_ra, d_dec
+
+
+def tete(t):
+    """
+    Get rotation matrix in order to convert GCRS J2000 coordinates to
+    True Equator True Equinox (of date).
+
+    You can convert a GCRS position (pos) to True Equator True Equinox
+    using this formula:
+    
+    rot_mat = tete(t)
+    tete_coord = np.matmul(rot_mat, pos)
+    
+    Arguments
+    ---------
+        t (datetime) : Observation time (UTC)
+        
+    Returns
+    -------
+        Rotation matrix
+    """
+    return tete_rotmat(t)
 
 
 def to_tete(pos, t):
