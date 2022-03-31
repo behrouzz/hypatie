@@ -2,7 +2,7 @@
 
 import os.path
 from urllib.request import urlretrieve
-from hypatie.time import datetime_to_jd
+from .time import datetime_to_jd
 import numpy as np
 
 FINALS2000A_URL = 'https://maia.usno.navy.mil/ser7/finals2000A.all'
@@ -32,4 +32,3 @@ def ut1_utc(t, dut1_array):
     cf = np.polyfit([t1[0],t2[0]], [t1[1],t2[1]], 1)
     f = np.poly1d(cf)
     return f(mjd)
-
