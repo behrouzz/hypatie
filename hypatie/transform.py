@@ -331,7 +331,7 @@ def radec_to_altaz(ra, dec, obs_loc, t):
     -------
         altitude, azimuth
     """
-    lon, lat = obs_loc
+    LON, LAT = obs_loc
 
     T = get_T(t)
     
@@ -348,7 +348,7 @@ def radec_to_altaz(ra, dec, obs_loc, t):
 
     # Real lon and lat
     # ================
-    lon , lat = LON, LAT
+    #lon , lat = LON, LAT
     xp = interpolate(t, pm_x)
     yp = interpolate(t, pm_y)
     lon = LON + (xp*np.sin(LON*d2r) + yp*np.cos(LON*d2r)) * np.tan(LAT*d2r) / 3600
