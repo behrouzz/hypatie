@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
 from .time import datetime_to_jd
-from .iau2000A import gcrs2tete, tete_rotmat
+from .iau import gcrs2tete, tete_rotmat
+from .iau import get_ERA, get_finals2000a, ut1_utc, get_T, interpolate, create_phi, equation_of_origins, equation_of_equinoxes
 
 d2r = np.pi/180
 r2d = 180/np.pi
@@ -228,9 +229,9 @@ def hadec_to_altaz(ha, dec, lat):
     return az, alt
 
 
-def radec_to_altaz(ra, dec, obs_loc, t):
+def radec_to_altaz_approx(ra, dec, obs_loc, t):
     """
-    Convert ra/dec coordinates to az/alt coordinates
+    Convert ra/dec coordinates to az/alt coordinates (approximate)
 
     Arguments
     ---------
@@ -314,6 +315,57 @@ def altaz_to_radec(lon, lat, az, alt, t=None):
 
     return ra, dec
 
+
+def radec_to_altaz(ra, dec, obs_loc, t):
+    """
+    Convert ra/dec coordinates to az/alt coordinates
+
+    Arguments
+    ---------
+        obs_loc (tuple): (longtitude, latitude) of observer
+        ra (float): right ascension of the object
+        dec (float): declination of the object
+        t (datetime): time of observation in UTC
+
+    Returns
+    -------
+        altitude, azimuth
+    """
+    lon, lat = obs_loc
+
+    T = get_T(t)
+    
+    # Calculate ERA
+    # =============
+    dut1_array, pm_x, pm_y = get_finals2000a()
+    dut1 = ut1_utc(t, dut1_array)
+    ERA = get_ERA(t, dut1)
+
+    # Find equation of origins
+    d_psi, d_e, e, F, D, om = create_phi(T)
+    eq_eq = equation_of_equinoxes(T, d_psi, e, F, D, om)
+    eq_or = equation_of_origins(T, eq_eq)
+
+    # Real lon and lat
+    # ================
+    lon , lat = LON, LAT
+    xp = interpolate(t, pm_x)
+    yp = interpolate(t, pm_y)
+    lon = LON + (xp*np.sin(LON*d2r) + yp*np.cos(LON*d2r)) * np.tan(LAT*d2r) / 3600
+    lat = LAT + (xp*np.cos(LON*d2r) - yp*np.sin(LON*d2r)) / 3600
+
+    # Calculate hour angle of object
+    # ==============================
+    # ra     : RA of object wrt equinox of date
+    # ra_sig : RA of object wrt CIO
+    eq_or = eq_or / 3600 # convert to degrees
+    ra_sig = (ra + eq_or) % 360
+    ha = (ERA - ra_sig + lon) % 360
+
+    # Calculate Az, Alt of object
+    # ===========================
+    az, alt = hadec_to_altaz(ha, dec, lat)
+    return az, alt
 
 def _in_vec(inp):
     if len(inp.shape)>1:
