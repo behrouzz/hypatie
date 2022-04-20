@@ -223,7 +223,8 @@ def rotating_coords(pos, period, times):
 
 def hadec_to_altaz(ha, dec, lat):
     tan_az = np.sin(ha*d2r) / ( np.cos(ha*d2r)*np.sin(lat*d2r) - np.tan(dec*d2r)*np.cos(lat*d2r) )
-    az = (np.arctan(tan_az) * r2d) % 360
+    #az = (np.arctan(tan_az) * r2d) % 360
+    az = (np.arctan(tan_az) * r2d + 180 ) % 360
     sin_alt = np.sin(lat*d2r)*np.sin(dec*d2r) + np.cos(lat*d2r)*np.cos(dec*d2r)*np.cos(ha*d2r)
     alt = np.arcsin(sin_alt) * r2d
     return az, alt
