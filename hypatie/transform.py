@@ -317,7 +317,7 @@ def altaz_to_radec(lon, lat, az, alt, t=None):
     return ra, dec
 
 
-def radec_to_altaz(ra, dec, obs_loc, t):
+def radec_to_altaz(ra, dec, obs_loc, t, gcrs=True):
     """
     Convert ra/dec coordinates to az/alt coordinates
 
@@ -327,12 +327,18 @@ def radec_to_altaz(ra, dec, obs_loc, t):
         ra (float): right ascension of the object
         dec (float): declination of the object
         t (datetime): time of observation in UTC
+        gcrs (bool): if True, ra & dec are in GCRS; if False, ra & dec in equinox of date
 
     Returns
     -------
         altitude, azimuth
     """
     LON, LAT = obs_loc
+    
+    if gcrs:
+        pos = sph2car(np.array([ra,dec,1]))
+        pos = gcrs2tete(pos, t)
+        ra, dec, _ = car2sph(pos)
 
     T = get_T(t)
     
