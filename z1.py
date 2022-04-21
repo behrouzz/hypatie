@@ -24,3 +24,13 @@ cc = c.transform_to(hadec)
 
 print('Behrouz Hour angle:', ha)
 print('Astropy Hour angle:', cc.ha.deg)
+
+from hypatie.transform import radec_to_altaz
+
+az, alt = radec_to_altaz(ra, dec, (lon, lat), t)
+print(az, alt)
+
+
+aa = AltAz(location=me, obstime=tt)
+ccc= c.transform_to(aa)
+print(ccc.az.value, ccc.alt.value)

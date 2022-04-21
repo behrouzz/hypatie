@@ -8,8 +8,9 @@ from datetime import datetime, timedelta
 from collections.abc import Iterable
 import re
 from .time import datetime_to_jd
-from .iau import gcrs2tete, tete_rotmat
-from .iau import get_ERA, get_finals2000a, ut1_utc, get_T, interpolate, create_phi, equation_of_origins, equation_of_equinoxes
+from .iau import gcrs2tete, tete_rotmat, get_ha
+#from .iau import get_ERA, get_finals2000a, ut1_utc, get_T, interpolate, create_phi, equation_of_origins, equation_of_equinoxes
+
 from .coordinates import RAhms, DECdms
 
 d2r = np.pi/180
@@ -187,7 +188,7 @@ def hadec_to_altaz(ha, dec, lat):
     return az, alt
 
 
-def radec_to_altaz(ra, dec, obs_loc, t):
+def radec_to_altaz_approx(ra, dec, obs_loc, t):
     """
     Convert ra/dec coordinates to az/alt coordinates (approximate)
 
@@ -273,16 +274,16 @@ def altaz_to_radec(lon, lat, az, alt, t=None):
 
     return ra, dec
 
-'''
-def radec_to_altaz(ra, dec, obs_loc, t, gcrs=True):
+
+def radec_to_altaz(ra, dec, obs_loc, t, gcrs=False):
     """
     Convert ra/dec coordinates to az/alt coordinates
 
     Arguments
     ---------
         obs_loc (tuple): (longtitude, latitude) of observer
-        ra (float): right ascension of the object
-        dec (float): declination of the object
+        ra (float): RA of the object (equinox of date)
+        dec (float): DEC of the object (equinox of date)
         t (datetime): time of observation in UTC
         gcrs (bool): if True, ra & dec are in GCRS; if False, ra & dec in equinox of date
 
@@ -290,13 +291,16 @@ def radec_to_altaz(ra, dec, obs_loc, t, gcrs=True):
     -------
         altitude, azimuth
     """
+    if gcrs:
+        pos = sph2car(np.array([ra,dec,1]))
+        pos = gcrs2tete(pos, t)
+        ra, dec, _ = car2sph(pos)
 
-
-    # Calculate Az, Alt of object
-    # ===========================
+    ha = get_ha(ra, dec, obs_loc, t)
+    lon, lat = obs_loc
     az, alt = hadec_to_altaz(ha, dec, lat)
     return az, alt
-'''
+
 
 def _in_vec(inp):
     if len(inp.shape)>1:
