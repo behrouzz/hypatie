@@ -9,8 +9,6 @@ from collections.abc import Iterable
 import re
 from .time import datetime_to_jd
 from .iau import gcrs2tete, tete_rotmat, get_ha
-#from .iau import get_ERA, get_finals2000a, ut1_utc, get_T, interpolate, create_phi, equation_of_origins, equation_of_equinoxes
-
 from .coordinates import RAhms, DECdms
 
 d2r = np.pi/180
@@ -180,12 +178,25 @@ def rotating_coords(pos, period, times):
 
 
 def hadec_to_altaz(ha, dec, lat):
+    """
     tan_az = np.sin(ha*d2r) / ( np.cos(ha*d2r)*np.sin(lat*d2r) - np.tan(dec*d2r)*np.cos(lat*d2r) )
     #az = (np.arctan(tan_az) * r2d) % 360
     az = (np.arctan(tan_az) * r2d + 180 ) % 360
     sin_alt = np.sin(lat*d2r)*np.sin(dec*d2r) + np.cos(lat*d2r)*np.cos(dec*d2r)*np.cos(ha*d2r)
     alt = np.arcsin(sin_alt) * r2d
+    """
+    x = np.cos(ha*d2r) * np.cos(dec*d2r)
+    y = np.sin(ha*d2r) * np.cos(dec*d2r)
+    z = np.sin(dec*d2r)
+    xhor = x*np.cos((90-lat)*d2r) - z*np.sin((90-lat)*d2r)
+    yhor = y
+    zhor = x*np.sin((90-lat)*d2r) + z*np.cos((90-lat)*d2r)
+    az = np.arctan2(yhor, xhor)*r2d + 180
+    alt = np.arcsin(zhor)*r2d
     return az, alt
+
+
+
 
 
 def radec_to_altaz_approx(ra, dec, obs_loc, t):
@@ -296,7 +307,7 @@ def radec_to_altaz(ra, dec, obs_loc, t, gcrs=False):
         pos = gcrs2tete(pos, t)
         ra, dec, _ = car2sph(pos)
 
-    ha = get_ha(ra, dec, obs_loc, t)
+    ha, obs_loc = get_ha(ra, dec, obs_loc, t)
     lon, lat = obs_loc
     az, alt = hadec_to_altaz(ha, dec, lat)
     return az, alt

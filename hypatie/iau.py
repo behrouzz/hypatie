@@ -315,7 +315,7 @@ def get_ERA(utc, dut1):
     return era_deg % 360
 
 
-def get_ha(ra, dec, obs_loc, t):
+def get_era_eqor(ra, dec, obs_loc, t):
     """
     Calculate hour angle of an object
 
@@ -331,12 +331,6 @@ def get_ha(ra, dec, obs_loc, t):
         hour angle (degrees)
     """
     LON, LAT = obs_loc
-    """
-    if gcrs:
-        pos = sph2car(np.array([ra,dec,1]))
-        pos = gcrs2tete(pos, t)
-        ra, dec, _ = car2sph(pos)
-    """
     T = get_T(t)
     
     # Calculate ERA
@@ -363,12 +357,32 @@ def get_ha(ra, dec, obs_loc, t):
     # ra     : RA of object wrt equinox of date
     # ra_sig : RA of object wrt CIO
     eq_or = eq_or / 3600 # convert to degrees
-    ra_sig = (ra + eq_or) % 360
-    ha = (ERA - ra_sig + lon) % 360
-    return ha
+    #ra_sig = (ra + eq_or) % 360
+    #ha = (ERA - ra_sig + lon) % 360
+    return ERA, eq_or, (lon, lat)
 
 
+def get_ha(ra, dec, obs_loc, t):
+    """
+    Calculate hour angle of an object
 
+    Arguments
+    ---------
+        obs_loc (tuple): (longtitude, latitude) of observer
+        ra (float): RA of the object (equinox of date)
+        dec (float): DEC of the object (equinox of date)
+        t (datetime): time of observation in UTC        
+
+    Returns
+    -------
+        hz (deg), obs_loc (lon, lat)
+    """
+    
+    era, eqor, obs_loc = get_era_eqor(ra, dec, obs_loc, t)
+    lon = obs_loc[0]
+    ra_sig = (ra + eqor) % 360
+    ha = (era - ra_sig + lon) % 360
+    return ha, obs_loc
 
 
 """
