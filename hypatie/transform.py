@@ -10,72 +10,39 @@ import re
 from .time import datetime_to_jd
 from .iau import gcrs2tete, tete_rotmat
 from .iau import get_ERA, get_finals2000a, ut1_utc, get_T, interpolate, create_phi, equation_of_origins, equation_of_equinoxes
+from .coordinates import RAhms, DECdms
 
 d2r = np.pi/180
 r2d = 180/np.pi
 
-def _rev(x):
-    if x >= 360:
-        while x >= 360:
-            x = x - 360
-    elif x < 0:
-        while x < 0:
-            x = 360 + x
-    return x
 
-rev = np.vectorize(_rev)
+def _time(t):
+    if isinstance(t, datetime):
+        return t
+    elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
+        return datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+    elif t is None:
+        return datetime.utcnow()
+    else:
+        raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
+   
 
+def mag(x):
+    """Returns magnitude of a vector"""
+    return np.linalg.norm(np.array(x))
 
-class RAhms:
-    def __init__(self, h=0, m=0, s=0):
-        self.h = h
-        self.m = m
-        self.s = s
-        self.hours = h + m/60 + s/3600
-        self.minutes = h*60 + m + s/60
-        self.seconds = h*3600 + m*60 + s
-        self.deg = 15 * self.hours
-        self.rad = self.deg * (3.141592653589793/180)
-        
-
-class DECdms:
-    def __init__(self, sign='+', d=0, m=0, s=0):
-        self.sign = sign
-        sgn = -1 if sign=='-' else 1
-        self.d = d
-        self.m = m
-        self.s = s
-        self.degrees = (d + m/60 + s/3600) * sgn
-        self.minutes = (d*60 + m + s/60) * sgn
-        self.seconds = (d*3600 + m*60 + s) * sgn
-        self.deg = self.degrees
-        self.rad = self.deg * (3.141592653589793/180)
+def unit(x):
+    """Returns unit vector of a vector"""
+    return x / mag(x)
 
 
-class RAdeg:
-    def __init__(self, ra):
-        self.rad = ra * (3.141592653589793/180)
-        self.h = int(ra/15)
-        self.m = int(((ra/15)-self.h)*60)
-        self.s = ((((ra/15)-self.h)*60)-self.m)*60
-        self.str = str(self.h)+'h' + str(self.m)+'m' + str(self.s)+'s'
-        
+def rev(x):
+    return x % 360
 
-class DECdeg:
-    def __init__(self, dec):
-        self.rad = dec * (3.141592653589793/180)
-        self.sign = '-' if dec<0 else '+'
-        dec = abs(dec)
-        self.d = int(dec)
-        self.m = abs(int((dec-self.d)*60))
-        self.s = (abs((dec-self.d)*60)-self.m)*60
-        self.str = self.sign + str(self.d)+'d' + \
-                   str(self.m)+'m' + str(self.s)+'s'
-        
 
 def to_epoch(ra, dec, epoch):
     """
-    Convert coordinates to another epoch
+    Convert coordinates to another epoch (approximative method)
 
     Note: you have to multiply d_ra and d_dec by (epoch-2000) and
     add the results to the initial ra and dec to get the new ra and
@@ -155,6 +122,14 @@ def to_tete(pos, t):
     return gcrs2tete(pos, t)
 
 
+def radec_to_tete(ra, dec, t):
+    #r = 10**100
+    r = 1
+    pos = sph2car(np.array([ra,dec,r]))
+    pos = gcrs2tete(pos, t)
+    ra, dec, _ = car2sph(pos)
+    return ra, dec
+
 def obliq(t):
     obl_cf = [23.439279444444445, -0.013010213611111111,
               -5.0861111111111115e-08, 5.565e-07,
@@ -165,25 +140,6 @@ def obliq(t):
     return f(T)
 
 
-def _time(t):
-    if isinstance(t, datetime):
-        return t
-    elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
-        return datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
-    elif t is None:
-        return datetime.utcnow()
-    else:
-        raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
-   
-
-def mag(x):
-    """Returns magnitude of a vector"""
-    return np.linalg.norm(np.array(x))
-
-def unit(x):
-    """Returns unit vector of a vector"""
-    return x / mag(x)
-
 def to_xy_plane(pos):
     """Returns new positions transformed in the xy plane"""
     mags = np.array([mag(i) for i in pos])
@@ -191,6 +147,7 @@ def to_xy_plane(pos):
     u = np.array([unit(i) for i in pos_z0])
     new_pos = np.array([u[i] * mags[i] for i in range(len(mags))])
     return new_pos
+
 
 def rotating_coords(pos, period, times):
     """
@@ -230,7 +187,7 @@ def hadec_to_altaz(ha, dec, lat):
     return az, alt
 
 
-def radec_to_altaz_approx(ra, dec, obs_loc, t):
+def radec_to_altaz(ra, dec, obs_loc, t):
     """
     Convert ra/dec coordinates to az/alt coordinates (approximate)
 
@@ -316,7 +273,7 @@ def altaz_to_radec(lon, lat, az, alt, t=None):
 
     return ra, dec
 
-
+'''
 def radec_to_altaz(ra, dec, obs_loc, t, gcrs=True):
     """
     Convert ra/dec coordinates to az/alt coordinates
@@ -333,46 +290,13 @@ def radec_to_altaz(ra, dec, obs_loc, t, gcrs=True):
     -------
         altitude, azimuth
     """
-    LON, LAT = obs_loc
-    
-    if gcrs:
-        pos = sph2car(np.array([ra,dec,1]))
-        pos = gcrs2tete(pos, t)
-        ra, dec, _ = car2sph(pos)
 
-    T = get_T(t)
-    
-    # Calculate ERA
-    # =============
-    dut1_array, pm_x, pm_y = get_finals2000a()
-    dut1 = ut1_utc(t, dut1_array)
-    ERA = get_ERA(t, dut1)
-
-    # Find equation of origins
-    d_psi, d_e, e, F, D, om = create_phi(T)
-    eq_eq = equation_of_equinoxes(T, d_psi, e, F, D, om)
-    eq_or = equation_of_origins(T, eq_eq)
-
-    # Real lon and lat
-    # ================
-    #lon , lat = LON, LAT
-    xp = interpolate(t, pm_x)
-    yp = interpolate(t, pm_y)
-    lon = LON + (xp*np.sin(LON*d2r) + yp*np.cos(LON*d2r)) * np.tan(LAT*d2r) / 3600
-    lat = LAT + (xp*np.cos(LON*d2r) - yp*np.sin(LON*d2r)) / 3600
-
-    # Calculate hour angle of object
-    # ==============================
-    # ra     : RA of object wrt equinox of date
-    # ra_sig : RA of object wrt CIO
-    eq_or = eq_or / 3600 # convert to degrees
-    ra_sig = (ra + eq_or) % 360
-    ha = (ERA - ra_sig + lon) % 360
 
     # Calculate Az, Alt of object
     # ===========================
     az, alt = hadec_to_altaz(ha, dec, lat)
     return az, alt
+'''
 
 def _in_vec(inp):
     if len(inp.shape)>1:

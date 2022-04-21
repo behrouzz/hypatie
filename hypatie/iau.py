@@ -315,6 +315,62 @@ def get_ERA(utc, dut1):
     return era_deg % 360
 
 
+def get_ha(ra, dec, obs_loc, t):
+    """
+    Calculate hour angle of an object
+
+    Arguments
+    ---------
+        obs_loc (tuple): (longtitude, latitude) of observer
+        ra (float): RA of the object (equinox of date)
+        dec (float): DEC of the object (equinox of date)
+        t (datetime): time of observation in UTC        
+
+    Returns
+    -------
+        hour angle (degrees)
+    """
+    LON, LAT = obs_loc
+    """
+    if gcrs:
+        pos = sph2car(np.array([ra,dec,1]))
+        pos = gcrs2tete(pos, t)
+        ra, dec, _ = car2sph(pos)
+    """
+    T = get_T(t)
+    
+    # Calculate ERA
+    # =============
+    dut1_array, pm_x, pm_y = get_finals2000a()
+    dut1 = ut1_utc(t, dut1_array)
+    ERA = get_ERA(t, dut1)
+
+    # Find equation of origins
+    d_psi, d_e, e, F, D, om = create_phi(T)
+    eq_eq = equation_of_equinoxes(T, d_psi, e, F, D, om)
+    eq_or = equation_of_origins(T, eq_eq)
+
+    # Real lon and lat
+    # ================
+    #lon , lat = LON, LAT
+    xp = interpolate(t, pm_x)
+    yp = interpolate(t, pm_y)
+    lon = LON + (xp*np.sin(LON*d2r) + yp*np.cos(LON*d2r)) * np.tan(LAT*d2r) / 3600
+    lat = LAT + (xp*np.cos(LON*d2r) - yp*np.sin(LON*d2r)) / 3600
+
+    # Calculate hour angle of object
+    # ==============================
+    # ra     : RA of object wrt equinox of date
+    # ra_sig : RA of object wrt CIO
+    eq_or = eq_or / 3600 # convert to degrees
+    ra_sig = (ra + eq_or) % 360
+    ha = (ERA - ra_sig + lon) % 360
+    return ha
+
+
+
+
+
 """
 T = get_T(t)
 GMST = 86400 * ERA + (0.014506 + 4612.156534*T + 1.3915817* T**2 \
