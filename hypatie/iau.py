@@ -12,6 +12,7 @@ from urllib.request import urlretrieve
 import numpy as np
 from datetime import datetime, timedelta
 from .time import utc2tdb, datetime_to_jd
+from .utils import is_recent
 
 NUT_URL = 'https://raw.githubusercontent.com/behrouzz/astrodatascience/main/data/iau2000A_nut.csv'
 FINALS2000A_URL = 'https://maia.usno.navy.mil/ser7/finals2000A.all'
@@ -243,7 +244,11 @@ def interpolate(t, array):
 
 
 def get_finals2000a():
-    if not os.path.exists(FINALS2000A_FNAME):
+    should_download = True
+    if os.path.exists(FINALS2000A_FNAME):
+        if is_recent(FINALS2000A_FNAME):
+            should_download = False
+    if should_download:
         print('Downloading '+FINALS2000A_FNAME+'...')
         urlretrieve(FINALS2000A_URL, FINALS2000A_FNAME)
 
