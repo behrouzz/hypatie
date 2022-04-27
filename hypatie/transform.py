@@ -10,33 +10,11 @@ import re
 from .time import datetime_to_jd
 from .iau import gcrs2tete, tete_rotmat, get_ha
 from .coordinates import RAhms, DECdms
+from .utils import mag, unit, rev, _time, _in_vec, _out_vec
 
 d2r = np.pi/180
 r2d = 180/np.pi
 
-
-def _time(t):
-    if isinstance(t, datetime):
-        return t
-    elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
-        return datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
-    elif t is None:
-        return datetime.utcnow()
-    else:
-        raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
-   
-
-def mag(x):
-    """Returns magnitude of a vector"""
-    return np.linalg.norm(np.array(x))
-
-def unit(x):
-    """Returns unit vector of a vector"""
-    return x / mag(x)
-
-
-def rev(x):
-    return x % 360
 
 
 def to_epoch(ra, dec, epoch):
@@ -311,40 +289,6 @@ def radec_to_altaz(ra, dec, obs_loc, t, gcrs=False):
     lon, lat = obs_loc
     az, alt = hadec_to_altaz(ha, dec, lat)
     return az, alt
-
-
-def _in_vec(inp):
-    if len(inp.shape)>1:
-        if inp.shape[-1]==3:
-            vec_out = inp[:,0], inp[:,1], inp[:,2]
-        elif inp.shape[-1]==2:
-            vec_out = inp[:,0], inp[:,1]
-        else:
-            raise Exception('Input imension not sopported!')
-    elif len(inp.shape)==1:
-        vec_out = inp
-    else:
-        raise Exception('Dimensionality problem! 2')
-    return vec_out
-
-
-def _out_vec(vec):
-    if len(vec.shape)>1:
-        vec = vec.T
-        if vec.shape[-1]==3:
-            x, y, z = vec[:,0], vec[:,1], vec[:,2]
-            vec_out = np.vstack((x, y, z)).T
-        elif vec.shape[-1]==2:
-            x, y = vec[:,0], vec[:,1]
-            vec_out = np.vstack((x, y)).T
-        else:
-            raise Exception('Dimensionality problem! 3')
-    elif len(vec.shape)==1:
-        vec_out = vec
-    else:
-        raise Exception('Dimensionality problem! 4')
-    return vec_out
-        
 
 
 def sph2car(sph):

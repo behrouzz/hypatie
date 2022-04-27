@@ -14,7 +14,7 @@ Install the latest version of *hypatie* from [PyPI](https://pypi.org/project/hyp
 Requirements are *numpy*, *pandas* and *matplotlib*.
 
 
-## Quick start
+## NASA JPL's Horizons
 
 Let's get the positions of the sun between two times:
 

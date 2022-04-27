@@ -17,7 +17,7 @@ from requests import request
 import numpy as np
 import pandas as pd
 from .plots import plot_altaz, plot_xyz
-from .data import cities
+from .data.cities import cities
 import matplotlib.pyplot as plt
 
 

@@ -28,7 +28,7 @@ import requests
 import json, csv, re
 from io import StringIO
 from datetime import datetime
-from .simbad_otypes import text
+from .data.simbad_otypes import text
 from .transform import altaz_to_radec, radec_to_altaz
 
 
@@ -93,7 +93,7 @@ def bright_objects(otype=None):
         Two lists : data field names, rows of data
     """
     
-    from .simbad_bright_objects import mag45
+    from .data.simbad_bright_objects import mag45
     f_mag45 = StringIO(mag45)
     rows_mag45 = []
     for row in csv.reader(f_mag45):
