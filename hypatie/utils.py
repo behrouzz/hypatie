@@ -17,6 +17,8 @@ def _time(t):
         return t
     elif isinstance(t, str) and bool(re.match("\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", t)):
         return datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+    elif t is None:
+        return datetime.utcnow()
     else:
         raise Exception("only datetime or str: '%Y-%m-%d %H:%M:%S'")
 
