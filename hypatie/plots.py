@@ -179,7 +179,7 @@ def star_chart(lon, lat, t=None, otype=None):
     mag = [i[2] for i in rows]
     ra  = [i[3] for i in rows]
     dec = [i[4] for i in rows]
-    alt, az = radec_to_altaz(lon, lat, ra, dec, t)
+    az, alt = radec_to_altaz(ra, dec, (lon,lat), t)
     fig, ax = plot_altaz(az, alt, mag=mag)
     return fig, ax
 
