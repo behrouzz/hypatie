@@ -174,7 +174,55 @@ def hadec_to_altaz(ha, dec, lat):
     return az, alt
 
 
+def radec_to_altaz(ra, dec, obs_loc, t, iau=False, gcrs=False):
+    """
+    Convert ra/dec coordinates to az/alt coordinates (approximate)
 
+    Arguments
+    ---------
+        lon (float): longtitude of observer location
+        lat (float): latitude of observer location
+        ra (iter of float): right ascension value(s)
+        dec (iter of float): declination value(s)
+        t (datetime or str): time of observation in UTC. default now.
+        iau (bool): if True, use IAU 2000A model
+
+    Returns
+    -------
+        altitude(s), azimuth(s)
+    """
+    if iau:
+        az, alt = radec_to_altaz_iau(ra, dec, obs_loc, t, gcrs)
+    else:
+        az, alt = radec_to_altaz_approx(ra, dec, obs_loc, t)
+    return az, alt
+        
+
+def radec_to_altaz_iau(ra, dec, obs_loc, t, gcrs=False):
+    """
+    Convert ra/dec coordinates to az/alt coordinates with IAU 2000A model
+
+    Arguments
+    ---------
+        obs_loc (tuple): (longtitude, latitude) of observer
+        ra (float): RA of the object (equinox of date)
+        dec (float): DEC of the object (equinox of date)
+        t (datetime): time of observation in UTC
+        gcrs (bool): if True, ra & dec are in GCRS; if False, ra & dec in equinox of date
+
+    Returns
+    -------
+        altitude, azimuth
+    """
+    if gcrs:
+        pos = sph2car(np.array([ra,dec,1]))
+        pos = gcrs2tete(pos, t)
+        ra, dec, _ = car2sph(pos)
+
+    ha, obs_loc = get_ha(ra, dec, obs_loc, t)
+    lon, lat = obs_loc
+    az, alt = hadec_to_altaz(ha, dec, lat)
+    return az, alt
 
 
 def radec_to_altaz_approx(ra, dec, obs_loc, t):
@@ -262,33 +310,6 @@ def altaz_to_radec(lon, lat, az, alt, t=None):
     ra = np.where(az>=180, (LST-ha)%360, (LST+ha)%360)
 
     return ra, dec
-
-
-def radec_to_altaz(ra, dec, obs_loc, t, gcrs=False):
-    """
-    Convert ra/dec coordinates to az/alt coordinates
-
-    Arguments
-    ---------
-        obs_loc (tuple): (longtitude, latitude) of observer
-        ra (float): RA of the object (equinox of date)
-        dec (float): DEC of the object (equinox of date)
-        t (datetime): time of observation in UTC
-        gcrs (bool): if True, ra & dec are in GCRS; if False, ra & dec in equinox of date
-
-    Returns
-    -------
-        altitude, azimuth
-    """
-    if gcrs:
-        pos = sph2car(np.array([ra,dec,1]))
-        pos = gcrs2tete(pos, t)
-        ra, dec, _ = car2sph(pos)
-
-    ha, obs_loc = get_ha(ra, dec, obs_loc, t)
-    lon, lat = obs_loc
-    az, alt = hadec_to_altaz(ha, dec, lat)
-    return az, alt
 
 
 def sph2car(sph):
