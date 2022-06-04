@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 from .time import utc2tt, datetime_to_jd
 from datetime import datetime
@@ -59,3 +60,78 @@ def dec_sun(t):
     in_cos = 0.98565*d2r*(N+10) + 1.914*d2r * np.sin(0.98565*d2r*(N-2))
     dec = -np.arcsin(0.39779 * np.cos(in_cos)) * r2d
     return dec
+
+
+class Segment:
+    """
+    Segment of SPK data created by numeph python package
+    """
+    def __init__(self, cet_tar, domain, coef):
+        self.cet_tar = cet_tar
+        self.center = cet_tar[0]
+        self.target = cet_tar[1]
+        self.domain = domain
+        self.coef = coef
+
+    def to_str(self):
+        cfx = self.coef[0,:,:]
+        cfy = self.coef[1,:,:]
+        cfz = self.coef[2,:,:]
+        cf_xyz = np.concatenate((cfx,cfy,cfz))
+        cf_str = num2txt(cf_xyz)
+        n_cols = cf_xyz.shape[1]
+        ini_dom = self.domain[0,0]
+        dt_rec = self.domain[0,1] - self.domain[0,0]
+        dt_dom = self.domain[-1,-1] - self.domain[0,0]
+        n_recs = cfx.shape[0]
+
+        first_row = [self.center, self.target, n_cols, n_recs, dt_rec, ini_dom, dt_dom]
+        first_row = ['segment'] + [str(int(i)) for i in first_row]
+        first_row = ','.join(first_row)+'\n'
+        return first_row + cf_str
+
+    def get_pos(self, t):
+        """
+        Get position of the object at time t
+        
+        Parameters
+        ----------
+            t (datetime)    : time for which the position is requested
+        
+        Returns
+        ----------
+            pos (np.array): position of the object at t
+        """
+        jd = datetime_to_jd(t)
+        t = jd_to_sec(jd)
+        mask = np.logical_and(t>=self.domain[:,0], t<self.domain[:,1])
+        rec = np.where(mask)[0][0] # record index
+        cfx = self.coef[0,rec,:]
+        cfy = self.coef[1,rec,:]
+        cfz = self.coef[2,rec,:]
+        fx = np.polynomial.chebyshev.Chebyshev(coef=cfx, domain=self.domain[rec])
+        fy = np.polynomial.chebyshev.Chebyshev(coef=cfy, domain=self.domain[rec])
+        fz = np.polynomial.chebyshev.Chebyshev(coef=cfz, domain=self.domain[rec])
+        pos = np.vstack((fx(t),fy(t),fz(t))).T[0]
+        return pos
+
+
+def load_pickle(fname):
+    """
+    Load an ephemeris pickle file (created by numeph python package)
+    
+    Parameters
+    ----------
+        fname (str) : path and name of the pickle file
+    
+    Returns
+    ----------
+        Dictionary of Segments
+    """
+    f = open(fname, 'rb')
+    data = pickle.load(f)
+    f.close()
+    dc = {}
+    for k,v in data.items():
+        dc[k] = Segment(k, v[0], v[1])
+    return dc
