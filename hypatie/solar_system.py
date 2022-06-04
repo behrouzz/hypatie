@@ -1,4 +1,4 @@
-import pickle
+import pickle, io
 import numpy as np
 from .time import utc2tt, datetime_to_jd
 from datetime import datetime
@@ -60,6 +60,18 @@ def dec_sun(t):
     in_cos = 0.98565*d2r*(N+10) + 1.914*d2r * np.sin(0.98565*d2r*(N-2))
     dec = -np.arcsin(0.39779 * np.cos(in_cos)) * r2d
     return dec
+
+
+
+def jd_to_sec(jd):
+    """jd to seconds since J2000"""
+    return (jd - 2451545.0) * 86400.0
+
+
+def num2txt(arr):
+    output = io.BytesIO()
+    np.savetxt(output, arr)
+    return output.getvalue().decode('utf-8')
 
 
 class Segment:
