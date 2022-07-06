@@ -228,3 +228,12 @@ class Catalogue:
         return data, meta
 
 
+def sql2df(script):
+    script = ' '.join(script.strip().split('\n'))
+    url = BASE+script.replace(' ', '%20')
+    r = json.loads(urlopen(url).read().decode('utf-8'))
+    cols = [i['name'] for i in r['metadata']]
+    data = pd.DataFrame(r['data'], columns=cols)
+    meta = pd.DataFrame(r['metadata'])
+    meta = meta[['name', 'description', 'unit']].set_index('name')
+    return data, meta
