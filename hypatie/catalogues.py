@@ -39,7 +39,7 @@ hipparcos_tb = 'I/239/hip_main'
 sdss12_tb = 'V/147/sdss12'
 glimpse_tb = 'II/293/glimpse'
 gaia2_tb = 'I/345/gaia2'
-gaiae3_tb = 'I/350/gaiaedr3'
+gaia3_tb = 'I/355/gaiadr3'
 dfgrs2_tb = 'VII/250/2dfgrs'
 glade2_tb = 'VII/281/glade2'
 
@@ -64,11 +64,12 @@ gaia2_fn = ['designation','source_id','random_index','ra_epoch2000',
             'phot_g_mean_mag','phot_bp_mean_mag','phot_rp_mean_flux',
             'phot_g_mean_flux','phot_bp_mean_flux','a_g_val',
             'phot_bp_rp_excess_factor']
-gaiae3_fn = ['EDR3Name','RAJ2000','DEJ2000','Epoch','Source','RandomI',
-             'Plx','e_Plx','pmRA','pmDE','NAL','NAC','MatchObs','FG','e_FG',
-             'FGCorr','Gmag','e_Gmag','GmagCorr','FBP','e_FBP','BPmag',
-             'e_BPmag','FRP','e_FRP','RPmag','e_RPmag','RVDR2','e_RVDR2',
-             'Tefftemp','GLON','GLAT']
+gaia3_fn = ['Source','RAJ2000','DEJ2000', #'RandomI',
+            'Plx','Dist','PM','pmRA','pmDE','RV','Teff','nueff','[Fe/H]','logg',
+            'Gmag','BPmag','RPmag','FG','FBP','FRP',
+            'HIP','SDSS13',
+            #FLAGS:
+            'XPcont','XPsamp','RVS','EpochPh','EpochRV']
 dfgrs2_fn = ['SeqNum','Name','RAJ2000','DEJ2000','Bjmag','Bjsel','z','q_z',
              'n_z','z.em','o_z.em','SNR']
 glade2_fn = ['PGC','GWGC','HyperLEDA','2MASS','SDSS-DR12','Flag1','RAJ2000',
@@ -81,12 +82,12 @@ dc = {'lqac5'     : [lqac5_tb, lqac5_fn],
       'sdss12'    : [sdss12_tb, sdss12_fn],
       'glimpse'   : [glimpse_tb, glimpse_fn],
       'gaia2'     : [gaia2_tb, gaia2_fn],
-      'gaiae3'    : [gaiae3_tb, gaiae3_fn],
+      'gaia3'    : [gaia3_tb, gaia3_fn],
       'dfgrs2'    : [dfgrs2_tb, dfgrs2_fn],
       'glade2'    : [glade2_tb, glade2_fn]}
 
 long_names = [lqac5_nm, ucac4_nm, hipparcos_nm, sdss12_nm,
-              glimpse_nm, gaia2_nm, gaiae3_nm, dfgrs2_nm, glade2_nm]
+              glimpse_nm, gaia2_nm, gaia3_nm, dfgrs2_nm, glade2_nm]
 
 # dictionary containing names of available catalogues
 available_catalogues = {k:v for (k,v) in [*zip(dc.keys(), long_names)]}
