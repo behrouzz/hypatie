@@ -12,7 +12,7 @@ You can find the current available catalogues with the dict:
  'sdss12': 'SDSS Photometric Catalogue, (Release 12)',
  'glimpse': 'GLIMPSE Source Catalog (I + II + 3D) (IPAC 2008)',
  'gaia2': 'Gaia data release 2',
- 'gaiae3': 'Gaia early data release 3'}
+ 'gaia3': 'Gaia data release 3'}
 """
 from urllib.request import urlopen
 import pandas as pd
