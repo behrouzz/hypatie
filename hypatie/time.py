@@ -170,3 +170,9 @@ def tdb2utc(tdb):
     tt = tdb2tt(tdb)
     utc = tt2utc(tt)
     return utc
+
+def tcb2utc(t):
+    mjd = datetime_to_jd(t) - 2400000.5
+    dt = (1.55051976772e-8 * (mjd-43144) * 86400 + 6.55e-5)
+    tdb = t - timedelta(seconds=dt)
+    return tdb2utc(tdb)
