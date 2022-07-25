@@ -124,7 +124,15 @@ def jd_to_datetime(jd):
     dt = datetime(year, month, d, h, m, s, ms)
         
     return dt
-  
+
+
+def get_gmst(t):
+    """Greenwich mean sidereal time (in degrees)"""
+    JD = datetime_to_jd(t)
+    T = (JD - 2451545) / 36525
+    GMST = 280.46061837 + 360.98564736629 * (JD - 2451545) + (0.000387933 * T**2) - (T**3 / 38710000)
+    return GMST % 360
+
 
 def get_lp(t):
     s = (t-datetime(1900,1,1)).total_seconds()
