@@ -134,6 +134,18 @@ def get_gmst(t):
     return GMST % 360
 
 
+def get_lst(t, lon):
+    GMST = get_gmst(t)
+    LST = GMST + lon
+    return LST % 360
+
+
+def get_ha(t, lon, ra):
+    LST = get_lst(t, lon)
+    ha = LST - ra
+    return ha % 360
+
+
 def get_lp(t):
     s = (t-datetime(1900,1,1)).total_seconds()
     if t < datetime(1972,1,1):
