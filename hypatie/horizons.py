@@ -454,3 +454,116 @@ def jupiter_moons(loc, t):
     plt.legend()
     plt.grid()
     return fig, ax
+
+
+class Apparent:
+    """
+    Observer Apparent position and brightness
+    
+    Parameters
+    ----------
+        target (str/int): targer body
+        t (datetime or str): UTC time of observation
+        obs_loc (tuple): observer location. (lon, lat, elevation) or (lon, lat)
+        retrieve (bool): whether to retrieve data or not
+    
+    Attributes
+    ----------
+        az (float): Azimuth of the target
+        alt (float): Altitude of the target
+        ap_mag (float): Apparent magnitude of the target
+        s_brt (float): Surface brightness of the target
+    
+    Methods
+    -------
+        get_request: Retrieve data from Horizons server
+    """
+    def __init__(self, target, t, obs_loc, retrieve=True):
+        self.target = target
+        self.t = t
+        self.__parse_time()
+        self.obs_loc = obs_loc
+        self.__correct_obs_loc()
+        self.__create_url()
+        
+        if retrieve:
+            self.get_request()
+        else:
+            self.az = None
+            self.alt = None
+            self.ap_mag = None
+            self.s_brt = None
+
+
+    def __parse_time(self):
+        if isinstance(self.t, str):
+            if len(self.t)!=19:
+                raise Exception('Accepted time format: %Y-%m-%d %H:%M:%S')
+            else:
+                self.t = datetime.strptime(self.t, '%Y-%m-%d %H:%M:%S')
+
+
+    def __correct_obs_loc(self):
+        if not isinstance(self.obs_loc, tuple):
+            raise Exception('obs_loc should be a tuple!')
+        if (len(self.obs_loc)<2) or (len(self.obs_loc)>3):
+            raise Exception('obs_loc not valid!')
+        if len(self.obs_loc)==2:
+            tmp = list(self.obs_loc) + [0]
+            self.obs_loc = tuple(tmp)
+            
+        obs_loc = tuple([str(i) for i in self.obs_loc])
+        self.obs_loc = ','.join(obs_loc)
+        
+
+    def __create_url(self):
+        t2 = self.t + timedelta(seconds=1)
+        t1 = self.t.isoformat()[:19].replace('T', ' ')
+        t2 = t2.isoformat()[:19].replace('T', ' ')
+
+        script = f"""
+        MAKE_EPHEM=YES
+        COMMAND='{self.target}'
+        EPHEM_TYPE=OBSERVER
+        CENTER='coord@399'
+        COORD_TYPE=GEODETIC
+        SITE_COORD='{self.obs_loc}'
+        START_TIME='{t1}'
+        STOP_TIME='{t2}'
+        STEP_SIZE='1'
+        QUANTITIES='4,9'
+        REF_SYSTEM='ICRF'
+        CAL_FORMAT='CAL'
+        TIME_DIGITS='SECONDS'
+        ANG_FORMAT='DEG'
+        APPARENT='AIRLESS'
+        RANGE_UNITS='KM'
+        SUPPRESS_RANGE_RATE='YES'
+        SKIP_DAYLT='NO'
+        SOLAR_ELONG='0,180'
+        EXTRA_PREC='NO'
+        RTS_ONLY='NO'
+        CSV_FORMAT='YES'
+        OBJ_DATA='NO'"""
+
+        params = script.replace('\n', '&')#.replace(' ', '')
+        self.url = BASE_URL + params
+
+
+    def get_request(self):
+        error_msg = ''
+        req = request('GET', self.url)
+        text = req.content.decode('utf-8')
+        if ('$$SOE' not in text) or ('$$EOE' not in text):
+            error_msg = text[:text.find('$$SOF')]
+            raise Exception(error_msg)
+        mark1 = text.find('$$SOE')
+        text = text[mark1+6:]
+        mark2 = text.find('$$EOE')
+        text = text[:mark2]
+        rows = text.split('\n')[:-1]
+        data = rows[0].split(',')
+        self.s_brt = float(data[-2].strip())
+        self.ap_mag = float(data[-3].strip())
+        self.alt = float(data[-4].strip())
+        self.az = float(data[-5].strip())
