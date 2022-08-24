@@ -464,7 +464,10 @@ class Apparent:
     ----------
         target (str/int): targer body
         t (datetime or str): UTC time of observation
-        obs_loc (tuple): observer location. (lon, lat, elevation) or (lon, lat)
+        obs_loc (str/tuple): observer location.
+                Name of city
+                or (lon, lat, elevation)
+                or (lon, lat)
         retrieve (bool): whether to retrieve data or not
     
     Attributes
@@ -504,17 +507,24 @@ class Apparent:
 
 
     def __correct_obs_loc(self):
-        if not isinstance(self.obs_loc, tuple):
-            raise Exception('obs_loc should be a tuple!')
-        if (len(self.obs_loc)<2) or (len(self.obs_loc)>3):
-            raise Exception('obs_loc not valid!')
-        if len(self.obs_loc)==2:
-            tmp = list(self.obs_loc) + [0]
-            self.obs_loc = tuple(tmp)
+        if isinstance(self.obs_loc, str):
+            self.obs_loc = self.obs_loc.lower()
+            if self.obs_loc in cities.keys():
+                lon, lat, el = cities[self.obs_loc]
+                tmp = [lon, lat, el/1000]
+                tmp = tuple([str(i) for i in tmp])
+                self.obs_loc = ','.join(tmp)
+            else:
+                raise Exception('obs_loc not valid!')
+        elif isinstance(self.obs_loc, tuple):
+            if (len(self.obs_loc)<2) or (len(self.obs_loc)>3):
+                raise Exception('obs_loc not valid!')
+            if len(self.obs_loc)==2:
+                tmp = list(self.obs_loc) + [0]
+                self.obs_loc = tuple(tmp)
+            obs_loc = tuple([str(i) for i in self.obs_loc])
+            self.obs_loc = ','.join(obs_loc)
             
-        obs_loc = tuple([str(i) for i in self.obs_loc])
-        self.obs_loc = ','.join(obs_loc)
-        
 
     def __create_url(self):
         t2 = self.t + timedelta(seconds=1)

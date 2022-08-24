@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="hypatie",
-    version="2.17.2",
+    version="2.18.0",
     author="Behrouz Safari",
     author_email="behrouz.safari@gmail.com",
     description="A python package for astronomical calculations",
@@ -21,5 +21,5 @@ setup(
     packages = find_packages(),
     include_package_data=True,
     install_requires=["numpy", "scipy", "matplotlib","pandas", "requests"],
-    python_requires='>=3.4',
+    python_requires='>=3.6',
 )
