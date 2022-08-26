@@ -1,7 +1,8 @@
 import pickle, io
 import numpy as np
 from .time import utc2tt, datetime_to_jd
-from datetime import datetime
+from .utils import mag
+from datetime import datetime, timedelta
 
 d2r = np.pi/180
 r2d = 180/np.pi
@@ -147,3 +148,17 @@ def load_pickle(fname):
     for k,v in data.items():
         dc[k] = Segment(k, v[0], v[1])
     return dc
+
+
+def light_travel_correction(dc, t, body_id, get_body_func):
+    earth = dc[(0, 3)].get_pos(t) + dc[(3, 399)].get_pos(t)
+    dltt = timedelta(seconds=20)
+    t_emit = t
+    ltt = 0
+    while dltt > timedelta(microseconds=1):
+        body = get_body_func(dc, t_emit, body_id)
+        earth_distance = mag(body - earth)
+        dltt = timedelta(seconds=ltt - earth_distance/c)
+        ltt = earth_distance/c
+        t_emit = t - timedelta(seconds=ltt)
+    return get_body_func(dc, t_emit, body_id)
