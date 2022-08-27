@@ -36,6 +36,7 @@ def _time_format(t): #check time format
 
 
 def script_to_df(script):
+    script = script.replace('+','%2B')
     url = BASE_URL + script
     error_msg = ''
     req = request('GET', url)
