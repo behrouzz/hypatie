@@ -35,7 +35,7 @@ def _time_format(t): #check time format
     return [correct, t]
 
 
-def download(script):
+def script_to_df(script):
     url = BASE_URL + script
     error_msg = ''
     req = request('GET', url)
@@ -63,7 +63,8 @@ def download(script):
         row = [i.strip() for i in r]
         rows.append(row)
     df = pd.DataFrame(data=rows, columns=cols)
-    return modify_jpl_df(df)
+    #return modify_jpl_df(df)
+    return df
 
 
 def modify_jpl_df(df):
