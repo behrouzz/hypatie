@@ -364,6 +364,29 @@ def equ_car2ecl_car(equ_car):
     return ecl_car
 
 
+def equ2ecl(pos_equ_sph):
+    """
+    Convert Equatorial Spherical to Ecliptic Spherical
+    
+    Arguments
+    ---------
+        pos_equ_sph (array): ICRS (Equatorial Spherical)
+        
+    Returns
+    -------
+        pos_ecl_sph (array): Ecliptic Spherical
+    """
+    pos_equ_car = sph2car(pos_equ_sph)
+
+    e = (23 + 26/60 + 21.448/3600) * (np.pi/180)
+    arr = np.array([[1,  0,         0        ],
+                    [0,  np.cos(e), np.sin(e)],
+                    [0, -np.sin(e), np.cos(e)]])
+    pos_ecl_car = np.matmul(arr, pos_equ_car)
+    
+    pos_ecl_sph = car2sph(pos_ecl_car)
+    return pos_ecl_sph
+
 
 def angular_separation(r1, d1, r2, d2):
     """
