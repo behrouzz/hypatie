@@ -364,28 +364,46 @@ def equ_car2ecl_car(equ_car):
     return ecl_car
 
 
-def equ2ecl(pos_equ_sph):
+def equ2ecl(pos_equ_car):
     """
-    Convert Equatorial Spherical to Ecliptic Spherical
+    Convert Equatorial to Ecliptic (both cartesian)
     
     Arguments
     ---------
-        pos_equ_sph (array): ICRS (Equatorial Spherical)
+        pos_equ_car (array): ICRS (Equatorial cartesian)
         
     Returns
     -------
-        pos_ecl_sph (array): Ecliptic Spherical
+        pos_ecl_car (array): Ecliptic cartesian
     """
-    pos_equ_car = sph2car(pos_equ_sph)
-
+    pos_equ_car = np.array(pos_equ_car)
     e = (23 + 26/60 + 21.448/3600) * (np.pi/180)
     arr = np.array([[1,  0,         0        ],
                     [0,  np.cos(e), np.sin(e)],
                     [0, -np.sin(e), np.cos(e)]])
     pos_ecl_car = np.matmul(arr, pos_equ_car)
+    return pos_ecl_car
+
+
+def ecl2equ(pos_ecl_car):
+    """
+    Convert Ecliptic to Equatorial(both cartesian)
     
-    pos_ecl_sph = car2sph(pos_ecl_car)
-    return pos_ecl_sph
+    Arguments
+    ---------
+        pos_ecl_car (array): Ecliptic cartesian
+        
+    Returns
+    -------
+        pos_equ_car (array): Equatorial cartesian
+    """
+    pos_ecl_car = np.array(pos_ecl_car)
+    e = (23 + 26/60 + 21.448/3600) * (np.pi/180)
+    arr = np.array([[1, 0,          0        ],
+                    [0, np.cos(e), -np.sin(e)],
+                    [0, np.sin(e),  np.cos(e)]])
+    pos_equ_car = np.matmul(arr, pos_ecl_car)
+    return pos_equ_car
 
 
 def angular_separation(r1, d1, r2, d2):
