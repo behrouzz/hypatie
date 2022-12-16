@@ -3,6 +3,7 @@ Module transform
 ================
 This module supplies classes and functions for dealing with coordinates
 """
+from math import pi, sin, cos, asin, acos
 import numpy as np
 from datetime import datetime, timedelta
 from collections.abc import Iterable
@@ -12,8 +13,8 @@ from .iau import gcrs2tete, tete_rotmat, get_ha
 from .coordinates import RAhms, DECdms
 from .utils import mag, unit, rev, _time, _in_vec, _out_vec
 
-d2r = np.pi/180
-r2d = 180/np.pi
+d2r = pi/180
+r2d = 180/pi
 
 
 
@@ -551,3 +552,14 @@ def geocentric_to_geodetic(xyz):
     lon = np.arctan(y/x)
     obs_loc = lon*r2d, lat*r2d, h*1000
     return obs_loc
+
+
+def radec_to_galactic(ra, dec):
+    ra, dec = ra*d2r, dec*d2r
+    ra0 = 192.8595 *d2r # ra of Galactic North Pole (2000)
+    dec0 = 27.1284 *d2r # dec of Galactic North Pole (2000)
+    l0 = 122.9320 *d2r # Galactic longitude of Equatorial North Pole (2000)
+    b = asin( sin(dec)*sin(dec0) + cos(dec)*cos(dec0)*cos(ra-ra0) )
+    X = sin(dec)*cos(dec0) - cos(dec)*sin(dec0)*cos(ra-ra0)
+    l = l0 - acos(X/cos(b))
+    return l*r2d, b*r2d
