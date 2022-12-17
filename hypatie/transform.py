@@ -553,12 +553,21 @@ def geocentric_to_geodetic(xyz):
     return obs_loc
 
 
-def radec_to_galactic(ra, dec):
+def equ2gal(ra, dec):
+    """Convert equatorial to galactic coordinates"""
     ra, dec = ra*d2r, dec*d2r
-    ra0 = 192.8595 *d2r # ra of Galactic North Pole (2000)
-    dec0 = 27.1284 *d2r # dec of Galactic North Pole (2000)
-    l0 = 122.9320 *d2r # Galactic longitude of Equatorial North Pole (2000)
-    b = np.arcsin( np.sin(dec)*np.sin(dec0) + np.cos(dec)*np.cos(dec0)*np.cos(ra-ra0) )
-    X = np.sin(dec)*np.cos(dec0) - np.cos(dec)*np.sin(dec0)*np.cos(ra-ra0)
-    l = l0 - np.arccos(X/np.cos(b))
-    return l*r2d, b*r2d
+    
+    stheta = 0.88998808748
+    ctheta = 0.45598377618
+    psi = 0.57477043300
+    phi = 4.9368292465
+    
+    a = ra - phi
+    sb = np.sin(dec)
+    cb = np.cos(dec)
+    cbsa = cb * np.sin(a)
+    
+    l = np.arctan2(ctheta*cbsa + stheta*sb, cb*np.cos(a)) + psi
+    b = np.arcsin(-stheta * cbsa + ctheta * sb)
+
+    return (l*r2d)%360, b*r2d
