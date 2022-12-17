@@ -571,3 +571,31 @@ def equ2gal(ra, dec):
     b = np.arcsin(-stheta * cbsa + ctheta * sb)
 
     return (l*r2d)%360, b*r2d
+
+
+def gal2equ(l_gal, b_gal):
+    # Ref: https://github.com/esheldon/esutil/blob/master/esutil/coords.py
+
+    psi = 4.9368292465
+    stheta = -0.88998808748
+    ctheta = 0.45598377618
+    phi = 0.57477043300
+
+    a = l_gal * d2r - phi
+
+    b = b_gal * d2r
+    sb = np.sin(b)
+    cb = np.cos(b)
+    cbsa = cb * np.sin(a)
+    b = -stheta * cbsa + ctheta * sb
+    (w,) = np.where(b > 1.0)
+    if w.size > 0:
+        b[w] = 1.0
+
+    bo = np.arcsin(b) * r2d
+
+    a = np.arctan2(ctheta * cbsa + stheta * sb, cb * np.cos(a))
+
+    ao = ((a + psi + 4*np.pi) % (2*np.pi)) * r2d
+
+    return ao, bo
