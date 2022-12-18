@@ -11,6 +11,7 @@ from .time import datetime_to_jd
 from .iau import gcrs2tete, tete_rotmat, get_ha
 from .coordinates import RAhms, DECdms
 from .utils import mag, unit, rev, _time, _in_vec, _out_vec
+from .earth import geodetic_to_geocentric, geocentric_to_geodetic
 
 d2r = np.pi/180
 r2d = 180/np.pi
@@ -357,14 +358,14 @@ def equ_sph2ecl_sph(equsph):
     return eclsph
 
 
-def equ_car2ecl_car(equ_car):
-    equ_sph = car2sph(equ_car)
-    ecl_sph = equ_sph2ecl_sph(equ_sph)
-    ecl_car = sph2car(ecl_sph)
-    return ecl_car
+##def equ_car2ecl_car(equ_car):
+##    equ_sph = car2sph(equ_car)
+##    ecl_sph = equ_sph2ecl_sph(equ_sph)
+##    ecl_car = sph2car(ecl_sph)
+##    return ecl_car
 
 
-def equ2ecl(pos_equ_car):
+def equ_car2ecl_car(pos_equ_car):
     """
     Convert Equatorial to Ecliptic (both cartesian)
     
@@ -385,7 +386,7 @@ def equ2ecl(pos_equ_car):
     return pos_ecl_car
 
 
-def ecl2equ(pos_ecl_car):
+def ecl_car2equ_car(pos_ecl_car):
     """
     Convert Ecliptic to Equatorial(both cartesian)
     
@@ -487,7 +488,7 @@ def posvel(ra, dec, pmra, pmdec, distance, radvel):
     return pos1, vel
 
 
-def geodetic_to_geocentric(obs_loc):
+def geod2geoc(obs_loc):
     """
     Convert geodetic coordinates (lon, lat, h) to geocentric coordinates (x, y, z)
 
@@ -498,23 +499,11 @@ def geodetic_to_geocentric(obs_loc):
     Returns
     -------
         xyz : geocentric coordinates as (x, y, z) in km
-
-    Ref: Astrophysical formulae, 1999, vol.2, p.5
     """
-    lon , lat, h = obs_loc
-    h = h/1000 # convert m to km
-    re = 6378.1366 # equatorial radius
-    rp = 6356.7519 # polar radius
-    f = (re-rp)/re # flattening factor
-    C = (np.cos(lat*d2r)**2 + (1-f)**2 * np.sin(lat*d2r)**2) ** (-0.5)
-    S = (1-f)**2 * C
-    x = (re*C + h) * np.cos(lat*d2r) * np.cos(lon*d2r)
-    y = (re*C + h) * np.cos(lat*d2r) * np.sin(lon*d2r)
-    z = (re*S + h) * np.sin(lat*d2r)
-    return np.array([x,y,z])
+    return geodetic_to_geocentric(obs_loc)
 
 
-def geocentric_to_geodetic(xyz):
+def geoc2geod(xyz):
     """
     Convert geocentric coordinates (x, y, z) to geodetic coordinates (lon, lat, h)
 
@@ -525,77 +514,44 @@ def geocentric_to_geodetic(xyz):
     Returns
     -------
         obs_loc : geodetic (geographic) coordinates as (lon (deg), lat (deg), alt (m))
-
-    Ref: Astrophysical formulae, 1999, vol.2, p.6-7
     """
-    x, y, z = xyz
-    re = 6378.1366 # equatorial radius
-    rp = 6356.7519 # polar radius
-    rp = np.where(z<0, -rp, rp).ravel()[0]
-    r = (x**2 + y**2) ** 0.5
-    E = (rp*z - (re**2 - rp**2)) / (re*r)
-    F = (rp*z + (re**2 - rp**2)) / (re*r)
-    P = (4/3)*(E*F+1)
-    Q = 2*(E**2 - F**2)
-    D = P**3 + Q**2
-    if D < 0:
-        v = 2*np.sqrt(-P)*np.cos((1/3)*np.arccos((Q/P)*(-P)**(-0.5)))
-    else:
-        v = ((D**0.5 - Q)**(1/3)) - ((D**0.5 + Q)**(1/3))
-    if abs(z)<1: # or z==0:
-        v = -(v**3 + 2*Q)/(3*P)
-    G = 0.5 * ((E**2 + v)**0.5 + E)
-    t = ((G**2 + (F-v*G)/(2*G-E)) ** 0.5) - G
-    lat = np.arctan(re * (1-t**2)/(2*rp*t))
-    h = (r-re*t)*np.cos(lat) + (z-rp)*np.sin(lat)
-    lon = np.arctan(y/x)
-    obs_loc = lon*r2d, lat*r2d, h*1000
-    return obs_loc
+    return geocentric_to_geodetic(xyz)
+
+
+def euler(ai, bi, i):
+    # 0:equ2gal, 1:gal2equ, 2:equ2ecl, 3:ecl2equ
+    psi = np.array([0.57477043300, 4.9368292465, 0.0, 0.0])
+    stheta = np.array([0.88998808748, -0.88998808748, 0.39777715593, -0.39777715593])
+    ctheta = np.array([0.45598377618, 0.45598377618, 0.91748206207, 0.91748206207])
+    phi = np.array([4.9368292465, 0.57477043300, 0.0, 0.0])
+
+    a = ai*d2r - phi[i]
+    b = bi*d2r
+    sb = np.sin(b)
+    cb = np.cos(b)
+    cbsa = cb * np.sin(a)
+    a = np.arctan2(ctheta[i]*cbsa + stheta[i]*sb, cb*np.cos(a))
+    ao = ((a + psi[i] + (4*np.pi)) % (2*np.pi)) * r2d
+    bo = np.arcsin(-stheta[i]*cbsa + ctheta[i]*sb) * r2d
+    return np.array([ao, bo])
 
 
 def equ2gal(ra, dec):
     """Convert equatorial to galactic coordinates"""
-    ra, dec = ra*d2r, dec*d2r
-    
-    stheta = 0.88998808748
-    ctheta = 0.45598377618
-    psi = 0.57477043300
-    phi = 4.9368292465
-    
-    a = ra - phi
-    sb = np.sin(dec)
-    cb = np.cos(dec)
-    cbsa = cb * np.sin(a)
-    
-    l = np.arctan2(ctheta*cbsa + stheta*sb, cb*np.cos(a)) + psi
-    b = np.arcsin(-stheta * cbsa + ctheta * sb)
-
-    return (l*r2d)%360, b*r2d
+    return euler(ra, dec, 0)
 
 
-def gal2equ(l_gal, b_gal):
-    # Ref: https://github.com/esheldon/esutil/blob/master/esutil/coords.py
+def gal2equ(l, b):
+    """Convert galactic to equatorial coordinates"""
+    return euler(l, b, 1)
 
-    psi = 4.9368292465
-    stheta = -0.88998808748
-    ctheta = 0.45598377618
-    phi = 0.57477043300
 
-    a = l_gal * d2r - phi
+def equ2ecl(ra, dec):
+    """Convert equatorial to ecliptic coordinates"""
+    return euler(ra, dec, 2)
 
-    b = b_gal * d2r
-    sb = np.sin(b)
-    cb = np.cos(b)
-    cbsa = cb * np.sin(a)
-    b = -stheta * cbsa + ctheta * sb
-    (w,) = np.where(b > 1.0)
-    if w.size > 0:
-        b[w] = 1.0
 
-    bo = np.arcsin(b) * r2d
+def ecl2equ(lon, lat):
+    """Convert ecliptic to equatorial coordinates"""
+    return euler(lon, lat, 3)
 
-    a = np.arctan2(ctheta * cbsa + stheta * sb, cb * np.cos(a))
-
-    ao = ((a + psi + 4*np.pi) % (2*np.pi)) * r2d
-
-    return ao, bo

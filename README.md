@@ -144,7 +144,7 @@ You can download data from astronomical catalogues:
 ```python
 from hypatie.catalogues import Catalogue
 
-cat = Catalogue('gaia2')
+cat = Catalogue('gaia3')
 data, meta = cat.download()
 ```
 
