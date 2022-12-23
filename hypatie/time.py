@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
 import math
-import pickle
+import pickle, os
 import numpy as np
+from urllib.request import urlretrieve
+
 
 d2r = math.pi/180
 
@@ -200,15 +202,29 @@ def tcb2utc(t):
     return tdb2utc(tdb)
 
 
-def get_eot(t, eot_cfs_file):
+def get_eot(t, eot_cfs_file=None):
     """
     Equation of time
     
-    t : datetime
-    eot_cfs : path of the file containing the dictionary of coefficients
-    that should be downloaded from:
+    Arguments
+    ---------
+        t (datetime)       : time (no need to be exact)
+        eot_cfs_file (str) : path to pickle file containing EOT coefficients
+                             (Default is None, i.e. file will be downloaded)
+
+    Returns
+    -------
+        eot (timedelta) : equation of time
+
+    Note: the pickle file containing EOT coefficients from 2020 to 2050:
     https://github.com/behrouzz/astrodata/raw/main/eot/equation_of_time.pickle
     """
+    if eot_cfs_file is None:
+        eot_cfs_file = 'equation_of_time.pickle'
+        if not os.path.isfile(eot_cfs_file):
+            download_eot_cfs()
+
+        
     with open(eot_cfs_file, 'rb') as f:
         dc = pickle.load(f)
     day = (t - datetime(t.year, 1, 1)).days
@@ -217,10 +233,19 @@ def get_eot(t, eot_cfs_file):
     return timedelta(minutes=f(day))
 
 
-def solar_time(t_utc, lon, eot_cfs_file):
+def solar_time(t_utc, lon, eot_cfs_file=None):
     """
-    t : utc time
-    lon: longtitude of observer
+    Mean and True solar times
+    
+    Arguments
+    ---------
+        t_utc (datetime) : time in UTC
+        lon (float)      : longtitude of observer
+
+    Returns
+    -------
+        mean_solar_time
+        true_solar_time
     """
     dt_grw = timedelta(hours=(lon/15))
     mean_solar_time = t_utc + dt_grw
@@ -229,7 +254,21 @@ def solar_time(t_utc, lon, eot_cfs_file):
     return mean_solar_time, true_solar_time
 
 
-def get_noon(t, lon, eot_cfs_file):
+def get_noon(t, lon, eot_cfs_file=None):
+    """
+    Noon time
+    
+    Arguments
+    ---------
+        t (datetime)       : time (no need to be exact)
+        lon (float)        : longtitude of observer
+        eot_cfs_file (str) : path to pickle file containing EOT coefficients
+                             (Default is None, i.e. file will be downloaded)
+
+    Returns
+    -------
+        t_noon : time of the true noon
+    """
     mean_solar_time, true_solar_time = \
             solar_time(t, lon, eot_cfs_file)
 
@@ -239,5 +278,14 @@ def get_noon(t, lon, eot_cfs_file):
                   true_solar_time.day,
                   12)
 
-    noon = t - dt
-    return noon
+    t_noon = t - dt
+    return t_noon
+
+
+def download_eot_cfs():
+    file = 'equation_of_time.pickle'
+    url = 'https://github.com/behrouzz/astrodata/raw/main/eot/'+file
+    print(f'Downloading "{file}"...')
+    urlretrieve(url, file)
+    print(f'"{file}" downloaded.')
+    print()
