@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 import math
+import pickle
+import numpy as np
 
 d2r = math.pi/180
 
@@ -196,3 +198,46 @@ def tcb2utc(t):
     dt = (1.55051976772e-8 * (mjd-43144) * 86400 + 6.55e-5)
     tdb = t - timedelta(seconds=dt)
     return tdb2utc(tdb)
+
+
+def get_eot(t, eot_cfs_file):
+    """
+    Equation of time
+    
+    t : datetime
+    eot_cfs : path of the file containing the dictionary of coefficients
+    that should be downloaded from:
+    https://github.com/behrouzz/astrodata/raw/main/eot/equation_of_time.pickle
+    """
+    with open(eot_cfs_file, 'rb') as f:
+        dc = pickle.load(f)
+    day = (t - datetime(t.year, 1, 1)).days
+    coefs =  dc[t.year]
+    f = np.poly1d(coefs)
+    return timedelta(minutes=f(day))
+
+
+def solar_time(t_utc, lon, eot_cfs_file):
+    """
+    t : utc time
+    lon: longtitude of observer
+    """
+    dt_grw = timedelta(hours=(lon/15))
+    mean_solar_time = t_utc + dt_grw
+    eot = get_eot(t_utc, eot_cfs_file)
+    true_solar_time = mean_solar_time + eot
+    return mean_solar_time, true_solar_time
+
+
+def get_noon(t, lon, eot_cfs_file):
+    mean_solar_time, true_solar_time = \
+            solar_time(t, lon, eot_cfs_file)
+
+    dt = true_solar_time - \
+         datetime(true_solar_time.year,
+                  true_solar_time.month,
+                  true_solar_time.day,
+                  12)
+
+    noon = t - dt
+    return noon
