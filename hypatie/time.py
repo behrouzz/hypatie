@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 import math
 import pickle, os
 import numpy as np
+import pandas as pd
+from scipy import interpolate
 from urllib.request import urlretrieve
 
 
@@ -202,92 +204,139 @@ def tcb2utc(t):
     return tdb2utc(tdb)
 
 
-def get_eot(t, eot_cfs_file=None):
+def tim2ord(t):
+    d = (t - datetime(t.year, 1, 1)).total_seconds()/86400
+    return d
+
+
+def download_eot_file(path=None):
+    if path is None:
+        path = ''
+    tbl_file = 'eot_2020_2050.csv'
+    url = 'https://raw.githubusercontent.com/behrouzz/eot/main/'+tbl_file
+    print(f'Downloading "{tbl_file}"...')
+    urlretrieve(url, path+tbl_file)
+    print(f'"{tbl_file}" downloaded.')
+    print()
+    return path+tbl_file
+
+
+def eot_func(year=None, tbl_file=None, interp_kind='cubic'):
+    if year is None:
+        year = datetime.utcnow().year
+    if tbl_file is None:
+        tbl_file = 'eot_2020_2050.csv'
+        if not os.path.isfile(tbl_file):
+            tbl_file = download_eot_file()
+            
+    df = pd.read_csv(tbl_file)
+    y = df[str(year)].dropna().values
+    x = np.linspace(-0.5, len(y)-1.5, len(y))
+    f = interpolate.interp1d(x, y, kind=interp_kind)
+    return f
+
+
+def get_eot(t, tbl_file=None, interp_kind='cubic'):
     """
-    Equation of time
+    Equation of time for a given moment
     
     Arguments
     ---------
-        t (datetime)       : time (no need to be exact)
-        eot_cfs_file (str) : path to pickle file containing EOT coefficients
-                             (Default is None, i.e. file will be downloaded)
+        t (datetime)     : time (UTC)
+        tbl_file (str)   : path to csv file (table of daily values of EoT)
+                           (Default is None, i.e. file will be downloaded)
+        interp_kind (str): interpolation kind (linear, quadratic, cubic, etc.)
 
     Returns
     -------
-        eot (timedelta) : equation of time (seconds)
+        eot (float): equation of time in minutes
 
-    Note: the pickle file containing EOT coefficients from 2020 to 2050:
-    https://github.com/behrouzz/astrodata/raw/main/eot/eot_2020_2050.pickle
+    Note: the csv file containing daily values of EoT from 2020 to 2050:
+    https://raw.githubusercontent.com/behrouzz/eot/main/eot_2020_2050.csv
     """
-    if eot_cfs_file is None:
-        eot_cfs_file = 'eot_2020_2050.pickle'
-        if not os.path.isfile(eot_cfs_file):
-            download_eot_cfs()
-    
-    with open(eot_cfs_file, 'rb') as f:
-        dc = pickle.load(f)
-    
-    coefs =  dc[t.year]
-    f = np.poly1d(coefs)
-    t_ord = (t-datetime(t.year,1,1)).total_seconds()
-    return timedelta(seconds=f(t_ord))
+    f = eot_func(year=t.year, tbl_file=tbl_file, interp_kind=interp_kind)
+    equ_of_time = f(tim2ord(t)).flatten()[0]/60
+    return equ_of_time
 
 
-def solar_time(t_utc, lon, eot_cfs_file=None):
+def eot_time_window(time_window, tbl_file=None, interp_kind='cubic'):
+    """
+    Equation of time for a given time window (interval)
+    
+    Arguments
+    ---------
+        time_window (array of datetimes) : list or numpy array of times (UTC)
+        tbl_file (str)   : path to csv file (table of daily values of EoT)
+                           (Default is None, i.e. file will be downloaded)
+        interp_kind (str): interpolation kind (linear, quadratic, cubic, etc.)
+
+    Returns
+    -------
+        eot_arr (array of floats): equation of time in minutes for all moments
+
+    Note: the csv file containing daily values of EoT from 2020 to 2050:
+    https://raw.githubusercontent.com/behrouzz/eot/main/eot_2020_2050.csv
+    """
+    time_window = pd.Series(time_window)
+    years = time_window.dt.year.unique()
+    eot_arr = []
+    for yr in years:
+        tw = time_window[time_window.dt.year==yr]
+        ords = np.array([tim2ord(i) for i in tw])
+        f = eot_func(yr, tbl_file, interp_kind)
+        eot_arr = eot_arr + list(f(ords)/60)
+    eot_arr = np.array(eot_arr)
+    return eot_arr
+
+
+def solar_time(t, lon, tbl_file=None):
     """
     Mean and True solar times
     
     Arguments
     ---------
-        t_utc (datetime) : time in UTC
-        lon (float)      : longtitude of observer
-        eot_cfs_file (str) : path to pickle file containing EOT coefficients
-                             (Default is None, i.e. file will be downloaded)
+        t (datetime)   : time in UTC
+        lon (float)    : longtitude of observer
+        tbl_file (str) : path to csv file (table of daily values of EoT)
+                         (Default is None, i.e. file will be downloaded)
                              
     Returns
     -------
-        mean_solar_time
-        true_solar_time
+        mean_solar_time (datetime)
+        true_solar_time (datetime)
     """
-    dt_grw = timedelta(hours=(lon/15))
-    mean_solar_time = t_utc + dt_grw
-    eot = get_eot(t_utc, eot_cfs_file)
-    true_solar_time = mean_solar_time + eot
+    mean_solar_time = t + timedelta(hours=(lon/15))
+    equ_of_time = get_eot(t=t, tbl_file=tbl_file)
+    equ_of_time = timedelta(minutes=equ_of_time)
+    true_solar_time = mean_solar_time - equ_of_time
     return mean_solar_time, true_solar_time
 
 
-def get_noon(t, lon, eot_cfs_file=None):
+def get_noon(t, lon, tbl_file=None):
     """
-    Noon time
-    
+    Calculate the noon time for a given longtitude in UTC
+
     Arguments
     ---------
-        t (datetime)       : time (no need to be exact)
-        lon (float)        : longtitude of observer
-        eot_cfs_file (str) : path to pickle file containing EOT coefficients
-                             (Default is None, i.e. file will be downloaded)
+        t (str/datetime) : time (UTC)
+        lon (float)      : longtitude
+        tbl_file (str)   : path to csv file (table of daily values of EoT)
+                           (Default is None, i.e. file will be downloaded)
 
     Returns
     -------
-        t_noon : time of the true noon
+        noon (datetime): noon time in UTC
     """
-    mean_solar_time, true_solar_time = \
-            solar_time(t, lon, eot_cfs_file)
+    if isinstance(t, str):
+        t = datetime.strptime(t[:10], '%Y-%m-%d')
+    # mean solar time at noon (local in UTC):
+    mean_st = datetime(t.year, t.month, t.day, 12) - \
+              timedelta(hours=(lon/15))
+    equ_of_time = get_eot(t=mean_st, tbl_file=tbl_file)
+    equ_of_time = timedelta(minutes=equ_of_time)
+    # true solar time at noon (local in UTC):
+    true_st = mean_st - equ_of_time
+    return true_st
 
-    dt = true_solar_time - \
-         datetime(true_solar_time.year,
-                  true_solar_time.month,
-                  true_solar_time.day,
-                  12)
-
-    t_noon = t - dt
-    return t_noon
 
 
-def download_eot_cfs():
-    file = 'eot_2020_2050.pickle'
-    url = 'https://github.com/behrouzz/astrodata/raw/main/eot/'+file
-    print(f'Downloading "{file}"...')
-    urlretrieve(url, file)
-    print(f'"{file}" downloaded.')
-    print()
