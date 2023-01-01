@@ -221,22 +221,28 @@ def download_eot_file(path=None):
     return path+tbl_file
 
 
-def eot_func(year=None, tbl_file=None, interp_kind='cubic'):
+def eot_func(year=None, eot_df=None, tbl_file=None, interp_kind='cubic'):
     if year is None:
         year = datetime.utcnow().year
-    if tbl_file is None:
-        tbl_file = 'eot_2020_2050.csv'
-        if not os.path.isfile(tbl_file):
-            tbl_file = download_eot_file()
+    if eot_df is None:
+        if tbl_file is None:
+            tbl_file = 'eot_2020_2050.csv'
+            if os.path.isfile(tbl_file):
+                eot_df = pd.read_csv(tbl_file)
+            else:
+                tbl_file = download_eot_file()
+                eot_df = pd.read_csv(tbl_file)
+        else:
+            eot_df = pd.read_csv(tbl_file)
             
-    df = pd.read_csv(tbl_file)
-    y = df[str(year)].dropna().values
+    #df = pd.read_csv(tbl_file)
+    y = eot_df[str(year)].dropna().values
     x = np.linspace(-0.5, len(y)-1.5, len(y))
     f = interpolate.interp1d(x, y, kind=interp_kind)
     return f
 
 
-def get_eot(t, tbl_file=None, interp_kind='cubic'):
+def get_eot(t, eot_df=None, tbl_file=None, interp_kind='cubic'):
     """
     Equation of time for a given moment
     
@@ -254,12 +260,12 @@ def get_eot(t, tbl_file=None, interp_kind='cubic'):
     Note: the csv file containing daily values of EoT from 2020 to 2050:
     https://raw.githubusercontent.com/behrouzz/eot/main/eot_2020_2050.csv
     """
-    f = eot_func(year=t.year, tbl_file=tbl_file, interp_kind=interp_kind)
+    f = eot_func(t.year, eot_df, tbl_file, interp_kind)
     equ_of_time = f(tim2ord(t)).flatten()[0]/60
     return equ_of_time
 
 
-def eot_time_window(time_window, tbl_file=None, interp_kind='cubic'):
+def eot_time_window(time_window, eot_df=None, tbl_file=None, interp_kind='cubic'):
     """
     Equation of time for a given time window (interval)
     
@@ -283,13 +289,13 @@ def eot_time_window(time_window, tbl_file=None, interp_kind='cubic'):
     for yr in years:
         tw = time_window[time_window.dt.year==yr]
         ords = np.array([tim2ord(i) for i in tw])
-        f = eot_func(yr, tbl_file, interp_kind)
+        f = eot_func(yr, eot_df, tbl_file, interp_kind)
         eot_arr = eot_arr + list(f(ords)/60)
     eot_arr = np.array(eot_arr)
     return eot_arr
 
 
-def solar_time(t, lon, tbl_file=None):
+def solar_time(t, lon, eot_df=None, tbl_file=None):
     """
     Mean and True solar times
     
@@ -306,13 +312,13 @@ def solar_time(t, lon, tbl_file=None):
         true_solar_time (datetime)
     """
     mean_solar_time = t + timedelta(hours=(lon/15))
-    equ_of_time = get_eot(t=t, tbl_file=tbl_file)
+    equ_of_time = get_eot(t, eot_df, tbl_file)
     equ_of_time = timedelta(minutes=equ_of_time)
     true_solar_time = mean_solar_time - equ_of_time
     return mean_solar_time, true_solar_time
 
 
-def get_noon(t, lon, tbl_file=None):
+def get_noon(t, lon, eot_df=None, tbl_file=None):
     """
     Calculate the noon time for a given longtitude in UTC
 
@@ -332,7 +338,7 @@ def get_noon(t, lon, tbl_file=None):
     # mean solar time at noon (local in UTC):
     mean_st = datetime(t.year, t.month, t.day, 12) - \
               timedelta(hours=(lon/15))
-    equ_of_time = get_eot(t=mean_st, tbl_file=tbl_file)
+    equ_of_time = get_eot(mean_st, eot_df, tbl_file)
     equ_of_time = timedelta(minutes=equ_of_time)
     # true solar time at noon (local in UTC):
     true_st = mean_st - equ_of_time
