@@ -1,4 +1,5 @@
 import os
+import inspect
 from datetime import datetime
 import numpy as np
 
@@ -10,6 +11,12 @@ def is_recent(fname):
     dt = (now - lm).total_seconds()
     recent = True if dt < 86400 else False
     return recent
+
+
+def package_folder():
+    file = inspect.getsourcefile(is_recent)
+    folder = os.path.dirname(file)
+    return folder
 
 
 def _time(t):
