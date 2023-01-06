@@ -69,6 +69,26 @@ def mjd_to_jd(mjd):
     return mjd + 2400000.5
 
 
+def dt_to_jd(t):
+    # faster than datetime_to_jd
+    t0 = datetime(1858, 11, 17, 0)
+    mjd = (t - t0).total_seconds()/86400
+    jd = mjd + 2400000.5
+    if t < datetime(1582,10,15):
+        jd += 10
+    return jd
+
+
+def jd_to_dt(jd):
+    # faster than jd_to_datetime
+    if jd < 2299160.5:
+        jd -= 10
+    mjd = jd - 2400000.5
+    t0 = datetime(1858, 11, 17, 0)
+    dt = t0 + timedelta(days=mjd)
+    return dt
+
+
 def datetime_to_jd(t):
     year = t.year
     month = t.month
