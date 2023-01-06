@@ -50,7 +50,25 @@ def jd_to_sec(jd):
     """jd to seconds since J2000"""
     return (jd - 2451545.0) * 86400.0
 
-  
+
+def dt_to_mjd(t):
+    t0 = datetime(1858, 11, 17, 0)
+    return (t - t0).total_seconds()/86400
+
+
+def mjd_to_dt(mjd):
+    t0 = datetime(1858, 11, 17, 0)
+    return t0 + timedelta(days=mjd)
+
+
+def jd_to_mjd(jd):
+    return jd - 2400000.5
+
+
+def mjd_to_jd(mjd):
+    return mjd + 2400000.5
+
+
 def datetime_to_jd(t):
     year = t.year
     month = t.month
