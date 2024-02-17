@@ -5,4 +5,4 @@ from .transform import radec_to_altaz, sph2car, car2sph
 from .simbad import sql2df
 from .time import datetime_to_jd, jd_to_datetime, utc2tdb, tdb2utc, get_noon, solar_time
 
-__version__ = "2.20.1"
+__version__ = "2.20.2"

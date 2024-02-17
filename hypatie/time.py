@@ -352,7 +352,7 @@ def solar_time(t, lon, eot_df=None, tbl_file=None):
     mean_solar_time = t + timedelta(hours=(lon/15))
     equ_of_time = get_eot(t, eot_df, tbl_file)
     equ_of_time = timedelta(minutes=equ_of_time)
-    true_solar_time = mean_solar_time - equ_of_time
+    true_solar_time = mean_solar_time + equ_of_time
     return mean_solar_time, true_solar_time
 
 
@@ -373,14 +373,12 @@ def get_noon(t, lon, eot_df=None, tbl_file=None):
     """
     if isinstance(t, str):
         t = datetime.strptime(t[:10], '%Y-%m-%d')
-    # mean solar time at noon (local in UTC):
-    mean_st = datetime(t.year, t.month, t.day, 12) - \
-              timedelta(hours=(lon/15))
-    equ_of_time = get_eot(mean_st, eot_df, tbl_file)
+    true12 = datetime(t.year, t.month, t.day, 12) - \
+             timedelta(hours=(lon/15))
+    equ_of_time = get_eot(true12, eot_df, tbl_file)
     equ_of_time = timedelta(minutes=equ_of_time)
-    # true solar time at noon (local in UTC):
-    true_st = mean_st - equ_of_time
-    return true_st
+    mn = true12 - equ_of_time
+    return mn
 
 
 
