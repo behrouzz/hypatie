@@ -62,6 +62,53 @@ def to_epoch(ra, dec, epoch):
     return d_ra, d_dec
 
 
+def epoch_prop_pos(ra0, dec0, plx, pmra, pmdec, radvel, t0, t1):
+    """
+    Calculates propagated position from reference epoch t0 to an arbitrary epoch t1
+
+    Ref.: https://gea.esac.esa.int/archive/documentation/GDR3/Data_processing/chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html
+
+    ARGUMENTS
+    ---------
+        ra0    : Right Ascension in Reference Epoch (deg)
+        dec0   : Declination in Reference Epoch (deg)
+        plx    : Parallax (mas)
+        pmra   : Proper Motion in Right Ascension (mas/yr)
+        pmdec  : Proper Motion in Declination (mas/yr)
+        radvel : Radial Velocity (km/s)
+        t0     : Reference Julian Epoch (yr)
+        t1     : Final Julian Epoch (yr)
+
+    RETURNS
+    -------
+        ra    : Right Ascension in Final Epoch (deg)
+        dec   : Declination in Final Epoch (deg)
+    """
+    
+    # Normal triad
+    p0 = np.array([-np.sin(ra0*d2r), np.cos(ra0*d2r), 0.0])
+    q0 = np.array([-np.sin(dec0*d2r)*np.cos(ra0*d2r), -np.sin(dec0*d2r)*np.sin(ra0*d2r), np.cos(dec0*d2r)])
+    r0 = np.array([np.cos(dec0*d2r)*np.cos(ra0*d2r), np.cos(dec0*d2r)*np.sin(ra0*d2r), np.sin(dec0*d2r)])
+
+    mas2rad = np.pi / (180 * 3600 * 1000)
+    Av = 4.740470646 # au in 'km yr /s'
+
+    t = t1 - t0
+    mur0 = radvel * plx / Av * mas2rad
+    mu02 = (pmra**2 + pmdec**2) * mas2rad**2
+    mu0 = pmra*mas2rad * p0 + pmdec*mas2rad * q0
+
+    # distance factor
+    f = (1 + 2 * mur0 * t + (mu02 + mur0**2) * t**2) ** (-0.5)
+
+    # propagation of the barycentric direction
+    u = (r0 * (1 + mur0 * t) + mu0 * t) * f
+
+    ra = (np.arctan2(u[1], u[0])*r2d) % 360
+    dec = np.arctan2(u[2], np.sqrt(u[0]**2 + u[1]**2))*r2d
+    return ra, dec
+
+
 def tete(t):
     """
     Get rotation matrix in order to convert GCRS J2000 coordinates to
